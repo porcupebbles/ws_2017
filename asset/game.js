@@ -15,12 +15,26 @@ window.onload = function(){
       Game.getDisplay('main').getContainer());
     document.getElementById('mh-message-display').appendChild(
       Game.getDisplay('message').getContainer());
+
+    var bindEventToScreen = function(eventType) {
+          window.addEventListener(eventType, function(evt) {
+            Game.eventHandler(eventType, evt);
+          });
+      };
+      // Bind keyboard input events
+      bindEventToScreen('keypress');
+      bindEventToScreen('keydown');
+
+      Game.switchUIMode(Game.UIMode.gameStart)
   }
 };
 
 var Game = {
-  
+
+  _randomSeed: 0,
   _DISPLAY_SPACING: 1.1,
+  _curUIMode: null,
+
   display: {
     main: {
       w: 80,
@@ -39,6 +53,12 @@ var Game = {
     }
   },
 
+  eventHandler: function(eventType, evt){
+    if(this._curUIMode){
+      this._curUIMode.handleInput(eventType, evt);
+    }
+  },
+
   init: function() {
       this._randomSeed = 5 + Math.floor(Math.random()*100000);
       //this._randomSeed = 76250;
@@ -52,7 +72,7 @@ var Game = {
 
       console.dir(this.display);
 
-      this.renderMain();
+      this.renderAll();
     },
 
     getDisplay: function (displayId) {
@@ -63,9 +83,37 @@ var Game = {
     },
 
     renderMain: function() {
-      var d = this.display.main.o;
-      for (var i = 0; i < 10; i++) {
-        d.drawText(5,i+5,"hello world");
+      if(this._curUIMode){
+        this._curUIMode.render(this.getDisplay("main"));
       }
+    },
+
+    renderAvatar: function(){
+      var d = this.getDisplay("avatar");
+      d.drawText(2, 2, "Avatar Box");
+    },
+
+    renderMessage: function(){
+      var d = this.getDisplay("message");
+      d.drawText(2, 2, "Message Box");
+    },
+
+    renderAll: function(){
+      this.renderAvatar();
+      this.renderMain();
+      this.renderMessage();
+    },
+
+    switchUIMode: function(newMode){
+      //handle exit from old mode
+      if(this._curUIMode !== null){
+        this._curUIMode.exit();
+      }
+      // set current to new mode
+      this._curUIMode = newMode;
+      // enter new mode
+      this._curUIMode.enter();
+      //render everything
+      this.renderAll();
     }
   };
