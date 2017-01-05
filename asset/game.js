@@ -105,8 +105,7 @@ var Game = {
     },
 
     renderMessage: function(){
-      var d = this.getDisplay("message");
-      d.drawText(2, 2, "Message Box");
+      Game.Message.render(this.display.message.o);
     },
 
     renderAll: function(){

@@ -3,39 +3,63 @@ Game.UIMode.DEFAULT_COLOR_FG = '#fff';
 Game.UIMode.DEFAULT_COLOR_BG = '#000';
 Game.UIMode.DEFAULT_COLOR_STR = '%c{'+Game.UIMode.DEFAULT_COLOR_FG+'}%b{'+Game.UIMode.DEFAULT_COLOR_BG+'}';
 
+//used to hold all the save states
+Game.UIMode.json_state_data = null;
+
 Game.UIMode.gameStart = {
   enter: function(){
     console.log("entered game start mode");
-    //Game.message.send();
+    Game.Message.send("Start Message");
   },
   exit: function(){
     console.log("exited game start mdoe");
   },
   render: function(display){
     console.log("rendered game start mode");
-    display.drawText(5,5,"gamestart mode");
-    display.drawText(5, 6, "press any key");
+    display.drawText(5,5,"Welcome");
+    display.drawText(5, 6, "press 'n' for a new game and 'l' to load an existing game");
   },
   handleInput: function(inputType, inputData){
     console.log("handling input in gamestart");
-    if (inputData.charCode !== 0) { // ignore the various modding keys - control, shift, etc.
-     Game.switchUIMode(Game.UIMode.gameSave);
+    if (inputType == 'keypress') {
+      if ((inputData.key == 'n') || (inputData.key == 'N') && (inputData.shiftKey)) {
+        Game.UIMode.gamePlay.setupPlay();
+        Game.switchUIMode(Game.UIMode.gamePlay);
+      }
+    }
+    else if ((inputData.key == 'l') || (inputData.key == 'L') && (inputData.shiftKey)) {
+      if(Game.UIMode.json_state_data !== null){
+        Game.UIMode.gamePlay.setupPlay(JSON.parse(json_state_data));
+        Game.switchUIMode(Game.UIMode.gameLose);
+      }else{
+        Game.Message.send("no saved games");
+        Game.renderAll();
+      }
     }
   }
 },
 
 Game.UIMode.gamePlay = {
+  attr: {
+    _map: null,
+    _mapWidth: 300,
+    _mapHeight: 200,
+    _cameraX: 100,
+    _cameraY: 100,
+    _avatarX: 100,
+    _avatarY: 100
+  },
   enter: function(){
     console.log("entered play mode");
-    //Game.message.clear();
+    Game.Message.clear();
+    Game.Message.send("now game play message");
   },
   exit: function(){
     console.log("exited game play mode");
   },
   render: function(display){
     console.log("rendering in game play");
-    display.drawText(5,5,"gameplay mode");
-    display.drawText(5,6,"W to win and L to Lose and S to Save");
+    this.attr._map.renderOn(display,this.attr._cameraX,this.attr._cameraY);
   },
   handleInput: function(inputType, inputData){
     console.log("handling input in gameplay");
@@ -50,7 +74,30 @@ Game.UIMode.gamePlay = {
     else if ((inputData.key == 's') || (inputData.key == 'S') && (inputData.shiftKey)) {
         Game.switchUIMode(Game.UIMode.gameSave);
     }
-  }
+  },
+  setupPlay: function (restorationData) {
+    var mapTiles = Game.util.init2DArray(this.attr._mapWidth,this.attr._mapHeight,Game.Tile.nullTile);
+    var generator = new ROT.Map.Cellular(this.attr._mapWidth,this.attr._mapHeight);
+    generator.randomize(0.5);
+
+    // repeated cellular automata process
+    var totalIterations = 3;
+    for (var i = 0; i < totalIterations - 1; i++) {
+      generator.create();
+    }
+
+    // run again then update map
+    generator.create(function(x,y,v) {
+      if (v === 1) {
+        mapTiles[x][y] = Game.Tile.floorTile;
+      } else {
+        mapTiles[x][y] = Game.Tile.wallTile;
+      }
+    });
+
+    // create map from the tiles
+    this.attr._map =  new Game.Map(mapTiles);
+  },
 },
 
 Game.UIMode.gameWin = {
@@ -66,7 +113,7 @@ Game.UIMode.gameWin = {
     },
     handleInput: function(inputType, inputData){
       console.log("handling input in game win");
-      //Game.Message.clear();
+      Game.Message.clear();
     }
 },
 
@@ -83,13 +130,14 @@ Game.UIMode.gameLose = {
     },
     handleInput: function(inputType, inputData){
       console.log("handling input in game lose");
-      //Game.message.clear();
+      Game.Message.clear();
     }
 },
 
 Game.UIMode.gameSave = {
     enter: function(){
       console.log("entered save mode");
+      Game.Message.send("now a game save message");
     },
     exit: function(){
       console.log("exiting save mode");
@@ -97,14 +145,13 @@ Game.UIMode.gameSave = {
     render: function(display){
       console.log("rendered save mode");
       display.drawText(5,5,"gameSave mode");
-      display.drawText(5,6,"Press 's' to save, 'l' to load and 'n' to start a new game");
+      display.drawText(5,6,"Press 's' to save, 'l' to load and 'n' to start a new game, 'r' to resume");
     },
     handleInput: function(inputType, inputData){
       console.log("handling input in game save");
       if (inputType == 'keypress') {
         if ((inputData.key == 's') || (inputData.key == 'S') && (inputData.shiftKey)) {
           if (this.localStorageAvailable()) {
-            //console.dir(JSON.stringify(Game.game));
             window.localStorage.setItem(Game._PERSISTANCE_NAMESPACE, JSON.stringify(Game.game)); // .toJSON()
           }
           else {
@@ -114,15 +161,20 @@ Game.UIMode.gameSave = {
         }
       }
       else if ((inputData.key == 'l') || (inputData.key == 'L') && (inputData.shiftKey)) {
-          var json_state_data = window.localStorage.getItem(Game._PERSISTANCE_NAMESPACE);
+          json_state_data = window.localStorage.getItem(Game._PERSISTANCE_NAMESPACE);
           console.log(json_state_data);
           var state_data = JSON.parse(json_state_data);
           console.dir(state_data);
           Game.setRandomSeed(state_data._randomSeed);
+          Game.UIMode.gamePlay.setupPlay(Game.UIMode.state_data);
           Game.switchUIMode(Game.UIMode.gamePlay);
       }
       else if ((inputData.key == 'n') || (inputData.key == 'N') && (inputData.shiftKey)) {
           Game.setRandomSeed(5 + Math.floor(ROT.RNG.getUniform()*100000));
+          Game.UIMode.gamePlay.setupPlay();
+          Game.switchUIMode(Game.UIMode.gamePlay);
+      }
+      else if ((inputData.key == 'r') || (inputData.key == 'R') && (inputData.shiftKey)) {
           Game.switchUIMode(Game.UIMode.gamePlay);
       }
 
