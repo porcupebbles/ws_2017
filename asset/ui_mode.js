@@ -11,12 +11,12 @@ Game.UIMode.gameStart = {
   render: function(display){
     console.log("rendered game start mode");
     display.drawText(5,5,"gamestart mode");
-    display.drawText(10, 10, "press any key");
+    display.drawText(5, 6, "press any key");
   },
   handleInput: function(inputType, inputData){
     console.log("handling input in gamestart");
     if (inputData.charCode !== 0) { // ignore the various modding keys - control, shift, etc.
-     Game.switchUIMode(Game.UIMode.gamePlay);
+     Game.switchUIMode(Game.UIMode.gameSave);
     }
   }
 },
@@ -31,8 +31,8 @@ Game.UIMode.gamePlay = {
   },
   render: function(display){
     console.log("rendering in game play");
-    display.drawText(5,6,"gameplay mode");
-    display.drawText(5,7,"W to win and L to Lose and S to Save");
+    display.drawText(5,5,"gameplay mode");
+    display.drawText(5,6,"W to win and L to Lose and S to Save");
   },
   handleInput: function(inputType, inputData){
     console.log("handling input in gameplay");
@@ -94,6 +94,7 @@ Game.UIMode.gameSave = {
     render: function(display){
       console.log("rendered save mode");
       display.drawText(5,5,"gameSave mode");
+      display.drawText(5,6,"Press 's' to save, 'l' to load and 'n' to start a new game");
     },
     handleInput: function(inputType, inputData){
       console.log("handling input in game save");
@@ -119,7 +120,7 @@ Game.UIMode.gameSave = {
       }
       else if ((inputData.key == 'n') || (inputData.key == 'N') && (inputData.shiftKey)) {
           Game.setRandomSeed(5 + Math.floor(ROT.RNG.getUniform()*100000));
-          Game.switchUIMode(Game.UIMode.game);
+          Game.switchUIMode(Game.UIMode.gamePlay);
       }
 
     },
