@@ -30,10 +30,11 @@ window.onload = function(){
 };
 
 var Game = {
-
+  _PERSISTANCE_NAMESPACE: 'wsrlgame',
   _randomSeed: 0,
   _DISPLAY_SPACING: 1.1,
   _curUIMode: null,
+  game: null,
 
   display: {
     main: {
@@ -59,11 +60,21 @@ var Game = {
     }
   },
 
+  setRandomSeed: function(s) {
+    this._randomSeed = s;
+    console.log("using random seed " + this._randomSeed);
+    ROT.RNG.setSeed(this._randomSeed);
+  },
+
+  getRandomSeed: function(){
+    return this._randomSeed;
+  },
+
   init: function() {
-      this._randomSeed = 5 + Math.floor(Math.random()*100000);
-      //this._randomSeed = 76250;
+    this.game = this;
+
+      this.setRandomSeed(5 + Math.floor(Math.random()*100000));
       console.log("using random seed "+this._randomSeed);
-      ROT.RNG.setSeed(this._randomSeed);
 
       for(var d_key in  this.display){
         this.display[d_key].o = new ROT.Display({width: this.display[d_key].w,
@@ -115,5 +126,10 @@ var Game = {
       this._curUIMode.enter();
       //render everything
       this.renderAll();
+    },
+
+    toJSON: function() {
+      var json = {"_randomSeed":this._randomSeed};
+      return json;
     }
   };
