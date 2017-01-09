@@ -6,6 +6,7 @@ Game.Map_Gen = {
 //features are 2-d arrays on set features i.e. houses, temples and stuff
 //which have to be exactly copied
 //null tiles are ignored in the setting process
+//potentially include requirements for placement as well somehow
   _features: {
     _test: Game.util.init2DArray(2,2,Game.Tile.testTile)
   },

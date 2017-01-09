@@ -46,8 +46,7 @@ Game.UIMode.gamePlay = {
     _mapHeight: 200,
     _cameraX: 5,
     _cameraY: 5,
-    _avatarX: 5,
-    _avatarY: 5
+    avatar: null
   },
   enter: function(){
     console.log("entered play mode");
@@ -63,19 +62,22 @@ Game.UIMode.gamePlay = {
     this.renderAvatar(display);
   },
   renderAvatar: function (display) {
-    Game.Symbol.AVATAR.draw(display,this.attr._avatarX-this.attr._cameraX+display._options.width/2,
-                                    this.attr._avatarY-this.attr._cameraY+display._options.height/2);
+    Game.Symbol.AVATAR.draw(display,this.attr.avatar.getX()-this.attr._cameraX+display._options.width/2,
+                                    this.attr.avatar.getY()-this.attr._cameraY+display._options.height/2);
   },
   renderAvatarInfo: function (display) {
     var fg = Game.UIMode.DEFAULT_COLOR_FG;
     var bg = Game.UIMode.DEFAULT_COLOR_BG;
-    display.drawText(1,2,"avatar x: "+this.attr._avatarX,fg,bg); // DEV
-    display.drawText(1,3,"avatar y: "+this.attr._avatarY,fg,bg); // DEV
+    display.drawText(1,2,"avatar x: "+this.attr.avatar.getX(),fg,bg); // DEV
+    display.drawText(1,3,"avatar y: "+this.attr.avatar.getY(),fg,bg); // DEV
+    display.drawText(1,4,"Turns: " + this.attr.avatar.getTurns(),fg,bg);
+    display.drawText(1,5,"HP: " + this.attr.avatar.getCurHp(),fg,bg);
   },
   moveAvatar: function (dx,dy) {
     //this is probably the best place to handle not walking into walls etc.
-    this.attr._avatarX = Math.min(Math.max(0,this.attr._avatarX + dx),this.attr._mapWidth);
-    this.attr._avatarY = Math.min(Math.max(0,this.attr._avatarY + dy),this.attr._mapHeight);
+    //this.attr.avatar.setX(Math.min(Math.max(0,this.attr.avatar.getX() + dx),this.attr._mapWidth));
+    //this.attr.avatar.setY(Math.min(Math.max(0,this.attr.avatar.getY() + dy),this.attr._mapHeight));
+    this.attr.avatar.tryWalk(this.attr._map, dx, dy);
     this.setCameraToAvatar();
   },
   moveCamera: function (dx,dy) {
@@ -86,26 +88,22 @@ Game.UIMode.gamePlay = {
     this.attr._cameraY = Math.min(Math.max(0,sy),this.attr._mapHeight);
   },
   setCameraToAvatar: function () {
-    this.setCamera(this.attr._avatarX,this.attr._avatarY);
+    this.setCamera(this.attr.avatar.getX(),this.attr.avatar.getY());
   },
   handleInput: function(inputType, inputData){
     console.log("handling input in gameplay");
     if(inputType == 'keypress'){
       switch(inputData.key){
         case 'w':
-        console.log("hit w");
         this.moveAvatar(0,-1);
         break;
         case 'a':
-        console.log("hit a");
         this.moveAvatar(-1,0);
         break;
         case 's':
-        console.log("hit s");
         this.moveAvatar(0,1);
         break;
         case 'd':
-        console.log("hit d");
         this.moveAvatar(1,0);
         break;
       }
@@ -115,6 +113,7 @@ Game.UIMode.gamePlay = {
   setupPlay: function (restorationData) {
     // create map from the tiles
     this.attr._map =  new Game.Map(Game.Map_Gen.basicMap(this.attr._mapWidth,this.attr._mapHeight));
+    this.attr.avatar = new Game.Entity(Game.EntityTemplates.Avatar);
     console.dir(this.attr._map);
   },
 },

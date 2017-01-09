@@ -1,9 +1,11 @@
-Game.Tile = function (name,symbol) {
-  this.attr = {
-    _sym: symbol,
-    _name: name
-  };
+Game.Tile = function (properties) {
+  properties = properties || {};
+  Game.Symbol.call(this, properties);
+  if (! ('attr' in this)) { this.attr = {}; }
+  this.attr._name = properties.name || 'unknown';
+  this.attr._walkable = properties.walkable || false;
 };
+Game.Tile.extend(Game.Symbol);
 
 Game.Tile.prototype.getSymbol = function () {
   return this.attr._sym;
@@ -11,10 +13,13 @@ Game.Tile.prototype.getSymbol = function () {
 Game.Tile.prototype.getName = function () {
   return this.attr._name;
 };
+Game.Tile.prototype.isWalkable = function () {
+  return this.attr._walkable;
+};
 //-----------------------------------------------------------------------------
 
-Game.Tile.nullTile = new Game.Tile('nullTile', new Game.Symbol());
-Game.Tile.floorTile = new Game.Tile('floor',new Game.Symbol('.'));
-Game.Tile.wallTile = new Game.Tile('wall',new Game.Symbol('#'));
+Game.Tile.nullTile = new Game.Tile({name:'nullTile'});
+Game.Tile.floorTile = new Game.Tile({name:'floor', chr:'.', walkable:true});
+Game.Tile.wallTile = new Game.Tile({name:'wall',chr:'#'});
 
-Game.Tile.testTile = new Game.Tile('test', new Game.Symbol('M'));
+Game.Tile.testTile = new Game.Tile({name:'test',chr:'M', walkable:true});
