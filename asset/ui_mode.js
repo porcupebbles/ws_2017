@@ -44,10 +44,10 @@ Game.UIMode.gamePlay = {
     _map: null,
     _mapWidth: 300,
     _mapHeight: 200,
-    _cameraX: 100,
-    _cameraY: 100,
-    _avatarX: 100,
-    _avatarY: 100
+    _cameraX: 5,
+    _cameraY: 5,
+    _avatarX: 5,
+    _avatarY: 5
   },
   enter: function(){
     console.log("entered play mode");
@@ -60,49 +60,69 @@ Game.UIMode.gamePlay = {
   render: function(display){
     console.log("rendering in game play");
     this.attr._map.renderOn(display,this.attr._cameraX,this.attr._cameraY);
+    this.renderAvatar(display);
+  },
+  renderAvatar: function (display) {
+    Game.Symbol.AVATAR.draw(display,this.attr._avatarX-this.attr._cameraX+display._options.width/2,
+                                    this.attr._avatarY-this.attr._cameraY+display._options.height/2);
+  },
+  renderAvatarInfo: function (display) {
+    var fg = Game.UIMode.DEFAULT_COLOR_FG;
+    var bg = Game.UIMode.DEFAULT_COLOR_BG;
+    display.drawText(1,2,"avatar x: "+this.attr._avatarX,fg,bg); // DEV
+    display.drawText(1,3,"avatar y: "+this.attr._avatarY,fg,bg); // DEV
+  },
+  moveAvatar: function (dx,dy) {
+    //this is probably the best place to handle not walking into walls etc.
+    this.attr._avatarX = Math.min(Math.max(0,this.attr._avatarX + dx),this.attr._mapWidth);
+    this.attr._avatarY = Math.min(Math.max(0,this.attr._avatarY + dy),this.attr._mapHeight);
+    this.setCameraToAvatar();
+  },
+  moveCamera: function (dx,dy) {
+    this.setCamera(this.attr._cameraX + dx,this.attr._cameraY + dy);
+  },
+  setCamera: function (sx,sy) {
+    this.attr._cameraX = Math.min(Math.max(0,sx),this.attr._mapWidth);
+    this.attr._cameraY = Math.min(Math.max(0,sy),this.attr._mapHeight);
+  },
+  setCameraToAvatar: function () {
+    this.setCamera(this.attr._avatarX,this.attr._avatarY);
   },
   handleInput: function(inputType, inputData){
     console.log("handling input in gameplay");
-    if (inputType == 'keypress') {
-      if ((inputData.key == 'w') || (inputData.key == 'W') && (inputData.shiftKey)) {
-        Game.switchUIMode(Game.UIMode.gameWin);
+    if(inputType == 'keypress'){
+      switch(inputData.key){
+        case 'w':
+        console.log("hit w");
+        this.moveAvatar(0,-1);
+        break;
+        case 'a':
+        console.log("hit a");
+        this.moveAvatar(-1,0);
+        break;
+        case 's':
+        console.log("hit s");
+        this.moveAvatar(0,1);
+        break;
+        case 'd':
+        console.log("hit d");
+        this.moveAvatar(1,0);
+        break;
       }
-    }
-    else if ((inputData.key == 'l') || (inputData.key == 'L') && (inputData.shiftKey)) {
-        Game.switchUIMode(Game.UIMode.gameLose);
-    }
-    else if ((inputData.key == 's') || (inputData.key == 'S') && (inputData.shiftKey)) {
-        Game.switchUIMode(Game.UIMode.gameSave);
+      Game.refresh();
     }
   },
   setupPlay: function (restorationData) {
-    var mapTiles = Game.util.init2DArray(this.attr._mapWidth,this.attr._mapHeight,Game.Tile.nullTile);
-    var generator = new ROT.Map.Cellular(this.attr._mapWidth,this.attr._mapHeight);
-    generator.randomize(0.5);
-
-    // repeated cellular automata process
-    var totalIterations = 3;
-    for (var i = 0; i < totalIterations - 1; i++) {
-      generator.create();
-    }
-
-    // run again then update map
-    generator.create(function(x,y,v) {
-      if (v === 1) {
-        mapTiles[x][y] = Game.Tile.floorTile;
-      } else {
-        mapTiles[x][y] = Game.Tile.wallTile;
-      }
-    });
-
     // create map from the tiles
-    this.attr._map =  new Game.Map(mapTiles);
+    this.attr._map =  new Game.Map(Game.Map_Gen.basicMap(this.attr._mapWidth,this.attr._mapHeight));
+    console.dir(this.attr._map);
   },
 },
 
 Game.UIMode.gameWin = {
     enter: function(){
       console.log("entered win mode");
+      Game.Message.clear();
     },
     exit: function(){
       console.log("exiting win mode");

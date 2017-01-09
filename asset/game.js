@@ -93,6 +93,10 @@ var Game = {
       return null;
     },
 
+    refresh: function(){
+      this.renderAll();
+    },
+
     renderMain: function() {
       if(this._curUIMode){
         this._curUIMode.render(this.getDisplay("main"));
@@ -100,8 +104,14 @@ var Game = {
     },
 
     renderAvatar: function(){
+      /*
+      if(this._curUIMode){
+        var d = this.getDisplay("avatar");
+        Game._curUIMode.renderAvatarInfo(d);
+      }
+      */
       var d = this.getDisplay("avatar");
-      d.drawText(2, 2, "Avatar Box");
+      d.drawText(2, 2, "Avatar Info");
     },
 
     renderMessage: function(){
