@@ -10,6 +10,12 @@ Game.UIMode.gameStart = {
   enter: function(){
     console.log("entered game start mode");
     Game.Message.send("Start Message");
+    Game.Message.send("Another Message 1");
+    Game.Message.send("Another Message 2");
+    Game.Message.send("Another Message 3");
+    Game.Message.send("Another Message 4");
+    Game.Message.send("Another Message 5");
+    Game.Message.send("Another Message 6");
   },
   exit: function(){
     console.log("exited game start mdoe");
@@ -23,23 +29,29 @@ Game.UIMode.gameStart = {
     console.log("handling input in gamestart");
     if (inputType == 'keypress') {
       if ((inputData.key == 'n') || (inputData.key == 'N') && (inputData.shiftKey)) {
-        Game.UIMode.gamePlay.setupPlay();
-        Game.switchUIMode(Game.UIMode.gamePlay);
+        Game.UIMode.gameSave.newGame();
       }
     }
     else if ((inputData.key == 'l') || (inputData.key == 'L') && (inputData.shiftKey)) {
-      if(Game.UIMode.json_state_data !== null){
-        Game.UIMode.gamePlay.setupPlay(JSON.parse(json_state_data));
-        Game.switchUIMode(Game.UIMode.gameLose);
-      }else{
-        Game.Message.send("no saved games");
-        Game.renderAll();
+      Game.UIMode.gameSave.saveGame();
+    }
+    //for testing
+    else if((inputData.key == 'i') || (inputData.key == 'I') && (inputData.shiftKey)){
+      if(Game.Message._messageNum > 0){
+        Game.Message._messageNum--;
+      }
+    } else if((inputData.key == 'k') || (inputData.key == 'K') && (inputData.shiftKey)){
+      if(Game.Message._messageNum < Game.Message._curMessages.length+1-Game.display.message.h){
+        Game.Message._messageNum++;
       }
     }
+    console.log(inputData.key);
+    Game.refresh();
   }
 },
 
 Game.UIMode.gamePlay = {
+  JSON_KEY: 'uiMode_gamePlay',
   attr: {
     _map: null,
     _mapWidth: 300,
@@ -52,6 +64,8 @@ Game.UIMode.gamePlay = {
     console.log("entered play mode");
     Game.Message.clear();
     Game.Message.send("now game play message");
+
+    Game.keyBinding.setTemplate("arrows");
   },
   exit: function(){
     console.log("exited game play mode");
@@ -92,19 +106,26 @@ Game.UIMode.gamePlay = {
   },
   handleInput: function(inputType, inputData){
     console.log("handling input in gameplay");
-    if(inputType == 'keypress'){
+    if(inputType == 'keypress' || inputType == 'keydown'){ //this is suspect
       switch(inputData.key){
-        case 'w':
+        case Game.keyBinding._curKeys["up"]:
+        console.log("got here");
         this.moveAvatar(0,-1);
         break;
-        case 'a':
+        case Game.keyBinding._curKeys["left"]:
         this.moveAvatar(-1,0);
         break;
-        case 's':
+        case Game.keyBinding._curKeys["down"]:
         this.moveAvatar(0,1);
         break;
-        case 'd':
+        case Game.keyBinding._curKeys["right"]:
         this.moveAvatar(1,0);
+        break;
+        case Game.keyBinding._curKeys["save_screen"]:
+        Game.switchUIMode(Game.UIMode.gameSave);
+        break;
+        case 'q':
+        Game.switchUIMode(Game.UIMode.gameOptions);
         break;
       }
       Game.refresh();
@@ -116,6 +137,13 @@ Game.UIMode.gamePlay = {
     this.attr.avatar = new Game.Entity(Game.EntityTemplates.Avatar);
     console.dir(this.attr._map);
   },
+
+  toJSON: function() {
+    return Game.UIMode.gameSave.BASE_toJSON.call(this);
+  },
+  fromJSON: function (json) {
+    Game.UIMode.gameSave.BASE_fromJSON.call(this,json);
+  }
 },
 
 Game.UIMode.gameWin = {
@@ -170,34 +198,76 @@ Game.UIMode.gameSave = {
       console.log("handling input in game save");
       if (inputType == 'keypress') {
         if ((inputData.key == 's') || (inputData.key == 'S') && (inputData.shiftKey)) {
-          if (this.localStorageAvailable()) {
-            window.localStorage.setItem(Game._PERSISTANCE_NAMESPACE, JSON.stringify(Game.game)); // .toJSON()
-          }
-          else {
-            console.log("no local storage availible");
-          }
-          Game.switchUIMode(Game.UIMode.gamePlay);
+          this.saveGame();
         }
       }
       else if ((inputData.key == 'l') || (inputData.key == 'L') && (inputData.shiftKey)) {
-          json_state_data = window.localStorage.getItem(Game._PERSISTANCE_NAMESPACE);
-          console.log(json_state_data);
-          var state_data = JSON.parse(json_state_data);
-          console.dir(state_data);
-          Game.setRandomSeed(state_data._randomSeed);
-          Game.UIMode.gamePlay.setupPlay(Game.UIMode.state_data);
-          Game.switchUIMode(Game.UIMode.gamePlay);
+          this.restoreGame();
       }
       else if ((inputData.key == 'n') || (inputData.key == 'N') && (inputData.shiftKey)) {
-          Game.setRandomSeed(5 + Math.floor(ROT.RNG.getUniform()*100000));
-          Game.UIMode.gamePlay.setupPlay();
-          Game.switchUIMode(Game.UIMode.gamePlay);
+          this.newGame();
       }
       else if ((inputData.key == 'r') || (inputData.key == 'R') && (inputData.shiftKey)) {
           Game.switchUIMode(Game.UIMode.gamePlay);
       }
 
     },
+
+    saveGame: function (json_state_data) {
+    if (this.localStorageAvailable()) {
+      window.localStorage.setItem(Game._PERSISTANCE_NAMESPACE, JSON.stringify(Game._game)); // .toJSON()
+      Game.switchUIMode(Game.UIMode.gamePlay);
+    }
+  },
+
+  restoreGame: function () {
+    if (this.localStorageAvailable()) {
+      var json_state_data = window.localStorage.getItem(Game._PERSISTANCE_NAMESPACE);
+      var state_data = JSON.parse(json_state_data);
+      Game.setRandomSeed(state_data._randomSeed);
+      Game.UIMode.gamePlay.setupPlay(state_data);
+      Game.switchUIMode(Game.UIMode.gamePlay);
+    }
+  },
+
+  newGame: function (){
+    Game.setRandomSeed(5 + Math.floor(ROT.RNG.getUniform()*100000));
+    Game.UIMode.gamePlay.setupPlay();
+    Game.switchUIMode(Game.UIMode.gamePlay);
+  },
+
+  BASE_toJSON: function(state_hash_name) {
+    var state = this.attr;
+    if (state_hash_name) {
+      state = this[state_hash_name];
+    }
+    var json = {};
+    for (var at in state) {
+      if (state.hasOwnProperty(at)) {
+        if (state[at] instanceof Object && 'toJSON' in state[at]) {
+          json[at] = state[at].toJSON();
+        } else {
+          json[at] = state[at];
+        }
+      }
+    }
+    return json;
+  },
+  BASE_fromJSON: function (json,state_hash_name) {
+    var using_state_hash = 'attr';
+    if (state_hash_name) {
+      using_state_hash = state_hash_name;
+    }
+    for (var at in this[using_state_hash]) {
+      if (this[using_state_hash].hasOwnProperty(at)) {
+        if (this[using_state_hash][at] instanceof Object && 'fromJSON' in this[using_state_hash][at]) {
+          this[using_state_hash][at].fromJSON(json[at]);
+        } else {
+          this[using_state_hash][at] = json[at];
+        }
+      }
+    }
+  },
 
     localStorageAvailable: function () { // NOTE: see https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API/Using_the_Web_Storage_API
   	   try {
@@ -211,4 +281,25 @@ Game.UIMode.gameSave = {
   		    return false;
   	    }
   }
-};
+},
+
+Game.UIMode.gameOptions = {
+  enter: function(){
+    console.log("entered options mode");
+  },
+  exit: function(){
+    console.log("exiting options mode");
+  },
+  render: function(display){
+    console.log("rendered options mode");
+    display.drawText(5,1,"Key Bindings");
+    display.drawText(1,1,"up: "+Game.keyBinding._curKeys["up"]);
+  },
+  handleInput: function(inputType, inputData){
+    console.log("handling input in game options");
+    Game.Message.clear();
+    if (inputType == 'keypress') {
+      Game.keyBinding.setKey("up", inputData);
+    }
+  }
+}
