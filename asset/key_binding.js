@@ -1,50 +1,74 @@
 //these key binding are intended for just gamePlay at this point
 Game.keyBinding = {
 
-  _curKeys: {
-    //these are referred to as function names
-    //whenever a new one is added templateBinding also has to be updated
-    up: 'w',
-    down: 's',
-    left: 'a',
-    right: 'd',
-    scroll_up: 'i',
-    scroll_down: 'k',
-    save_screen: 't'
-  },
-
+  _curKeys: [
+     {label: 'up', keyUsed: 'w'},
+     {label: 'down', keyUsed: 's'},
+     {label: 'left', keyUsed: 'a'},
+     {label: 'right', keyUsed: 'd'},
+     {label: 'scroll_up', keyUsed: 'i'},
+     {label: 'scroll_down', keyUsed: 'k'},
+     {label: 'save_screen', keyUsed: 't'},
+     {label: 'options', keyUsed: 'q'}
+  ],
 //it's important to put these templates in the same order as _curKeys
   templates: {
-    wasd: ['w', 's', 'a', 'd', 'i', 'k', 't'],
-    arrows: ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'i', 'k', 't']
+    wasd: [
+       {label: 'up', keyUsed: 'w'},
+       {label: 'down', keyUsed: 's'},
+       {label: 'left', keyUsed: 'a'},
+       {label: 'right', keyUsed: 'd'},
+       {label: 'scroll_up', keyUsed: 'i'},
+       {label: 'scroll_down', keyUsed: 'k'},
+       {label: 'save_screen', keyUsed: 't'},
+       {label: 'options', keyUsed: 'q'}
+    ],
+    arrows: [
+       {label: 'up', keyUsed: 'ArrowUp'},
+       {label: 'down', keyUsed: 'ArrowDown'},
+       {label: 'left', keyUsed: 'ArrowLeft'},
+       {label: 'right', keyUsed: 'ArrowRight'},
+       {label: 'scroll_up', keyUsed: 'i'},
+       {label: 'scroll_down', keyUsed: 'k'},
+       {label: 'save_screen', keyUsed: 't'},
+       {label: 'options', keyUsed: 'q'}
+    ]
   },
 
   setTemplate: function(template_name){
-    var i = 0;
-    for(var key in this._curKeys){
-      this._curKeys[key] = this.templates[template_name][i];
-      i++;
+    if(this.templates.hasOwnProperty(template_name)){
+      _curKeys = this.templates[template_name];
+    }else{
+      console.log("there was a problem setting a key template");
     }
-    console.dir(this._curKeys);
   },
 
 //potentially used to check for repeats
   contains: function(toCheck){
-    if(toCheck in this._curKeys){
+    var matches = Game.keyBinding._curKeys.filter(
+      function(elt,idx,arr) { return elt.keyUsed === toCheck; }
+    );
+    if(matches[0]){
       return true;
     }
     return false;
   },
 //sets an individual key
 //this assumes key will be of event type key press
-  setKey: function(function_name, key){
+  setKey: function(label_name, key){
     if(!this.contains(key)){
-      if(this._curKeys.hasOwnProperty(function_name)){
-        this._curKeys[function_name] = key;
+      var matches = Game.keyBinding._curKeys.filter(
+        function(elt,idx,arr) { return elt.label === label_name; }
+      );
+      if(matches[0]){
+        matches[0].keyUsed = key;
       }else{
         console.log("you f'ed up, function not legit");
       }
-  }
+    }else{
+      console.log("got here");
+      Game.Message.send("key already used");
+    }
   },
 
 //these will be important later for saving the game

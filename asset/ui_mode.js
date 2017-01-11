@@ -10,15 +10,11 @@ Game.UIMode.gameStart = {
   enter: function(){
     console.log("entered game start mode");
     Game.Message.send("Start Message");
-    Game.Message.send("Another Message 1");
-    Game.Message.send("Another Message 2");
-    Game.Message.send("Another Message 3");
-    Game.Message.send("Another Message 4");
-    Game.Message.send("Another Message 5");
-    Game.Message.send("Another Message 6");
+    Game.refresh();
+    console.dir(Game.keyBinding._curKeys[1]['label']);
   },
   exit: function(){
-    console.log("exited game start mdoe");
+    console.log("exited game start mode");
   },
   render: function(display){
     console.log("rendered game start mode");
@@ -35,18 +31,6 @@ Game.UIMode.gameStart = {
     else if ((inputData.key == 'l') || (inputData.key == 'L') && (inputData.shiftKey)) {
       Game.UIMode.gameSave.saveGame();
     }
-    //for testing
-    else if((inputData.key == 'i') || (inputData.key == 'I') && (inputData.shiftKey)){
-      if(Game.Message._messageNum > 0){
-        Game.Message._messageNum--;
-      }
-    } else if((inputData.key == 'k') || (inputData.key == 'K') && (inputData.shiftKey)){
-      if(Game.Message._messageNum < Game.Message._curMessages.length+1-Game.display.message.h){
-        Game.Message._messageNum++;
-      }
-    }
-    console.log(inputData.key);
-    Game.refresh();
   }
 },
 
@@ -64,7 +48,7 @@ Game.UIMode.gamePlay = {
     console.log("entered play mode");
     Game.Message.clear();
     Game.Message.send("now game play message");
-
+    Game.refresh();
     Game.keyBinding.setTemplate("arrows");
   },
   exit: function(){
@@ -88,9 +72,6 @@ Game.UIMode.gamePlay = {
     display.drawText(1,5,"HP: " + this.attr.avatar.getCurHp(),fg,bg);
   },
   moveAvatar: function (dx,dy) {
-    //this is probably the best place to handle not walking into walls etc.
-    //this.attr.avatar.setX(Math.min(Math.max(0,this.attr.avatar.getX() + dx),this.attr._mapWidth));
-    //this.attr.avatar.setY(Math.min(Math.max(0,this.attr.avatar.getY() + dy),this.attr._mapHeight));
     this.attr.avatar.tryWalk(this.attr._map, dx, dy);
     this.setCameraToAvatar();
   },
@@ -108,23 +89,22 @@ Game.UIMode.gamePlay = {
     console.log("handling input in gameplay");
     if(inputType == 'keypress' || inputType == 'keydown'){ //this is suspect
       switch(inputData.key){
-        case Game.keyBinding._curKeys["up"]:
-        console.log("got here");
+        case Game.getKey("up"):
         this.moveAvatar(0,-1);
         break;
-        case Game.keyBinding._curKeys["left"]:
+        case Game.getKey("left"):
         this.moveAvatar(-1,0);
         break;
-        case Game.keyBinding._curKeys["down"]:
+        case Game.getKey("down"):
         this.moveAvatar(0,1);
         break;
-        case Game.keyBinding._curKeys["right"]:
+        case Game.getKey("right"):
         this.moveAvatar(1,0);
         break;
-        case Game.keyBinding._curKeys["save_screen"]:
+        case Game.getKey("save_screen"):
         Game.switchUIMode(Game.UIMode.gameSave);
         break;
-        case 'q':
+        case Game.getKey("options"):
         Game.switchUIMode(Game.UIMode.gameOptions);
         break;
       }
@@ -150,6 +130,7 @@ Game.UIMode.gameWin = {
     enter: function(){
       console.log("entered win mode");
       Game.Message.clear();
+      Game.refresh();
     },
     exit: function(){
       console.log("exiting win mode");
@@ -167,6 +148,8 @@ Game.UIMode.gameWin = {
 Game.UIMode.gameLose = {
     enter: function(){
       console.log("entered lose mode");
+      Game.Message.clear();
+      Game.refresh();
     },
     exit: function(){
       console.log("exiting lose mode");
@@ -185,6 +168,7 @@ Game.UIMode.gameSave = {
     enter: function(){
       console.log("entered save mode");
       Game.Message.send("now a game save message");
+      Game.refresh();
     },
     exit: function(){
       console.log("exiting save mode");
@@ -284,22 +268,52 @@ Game.UIMode.gameSave = {
 },
 
 Game.UIMode.gameOptions = {
+  selected_function: 0,
+
   enter: function(){
     console.log("entered options mode");
+    Game.getDisplay('main').clear();
+    //Game.Message.clear();
+    this.selected_function=0,
+    Game.refresh();
   },
   exit: function(){
     console.log("exiting options mode");
   },
   render: function(display){
     console.log("rendered options mode");
-    display.drawText(5,1,"Key Bindings");
-    display.drawText(1,1,"up: "+Game.keyBinding._curKeys["up"]);
+
+//update this later
+    Game.getDisplay('main').clear(); //this could probably be handled more nicely
+
+    display.drawText(1,1,"Key Bindings (use tab to scroll)");
+
+    key: null;
+    for(var i = 0; i<Game.keyBinding._curKeys.length; i++){
+      key=Game.keyBinding._curKeys[i].label;
+      if(key != Game.keyBinding._curKeys[this.selected_function].label){
+        display.drawText(1,2+i,Game.keyBinding._curKeys[i].label+": "+Game.keyBinding._curKeys[i].keyUsed);
+      }else{
+        display.drawText(1,2+i,"%b{blue}"+Game.keyBinding._curKeys[i].label+": "+Game.keyBinding._curKeys[i].keyUsed);
+      }
+    }
   },
   handleInput: function(inputType, inputData){
     console.log("handling input in game options");
-    Game.Message.clear();
+    //Game.Message.clear();
     if (inputType == 'keypress') {
-      Game.keyBinding.setKey("up", inputData);
+      //this would also be the place to exclude any other keys that shouldn't be
+      //modified
+      if(inputData.key == 'p'){
+        if(this.selected_function+1 < Game.keyBinding._curKeys.length){
+          this.selected_function++;
+        }else{
+          this.selected_function=0;
+        }
+      }else{
+        Game.keyBinding.setKey(Game.keyBinding._curKeys[this.selected_function].label, inputData.key);
+      }
     }
+    Game.refresh();
   }
 }

@@ -91,6 +91,16 @@ window.onload = function(){
             return null;
           },
 
+          getKey: function (label_name){
+            var matches = Game.keyBinding._curKeys.filter(
+              function(elt,idx,arr) { return elt.label === label_name; }
+            );
+            if(matches[0]){
+              return matches[0].keyUsed;
+            }
+            return null;
+          },
+
           refresh: function(){
             this.renderAll();
           },
