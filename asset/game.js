@@ -35,6 +35,8 @@ window.onload = function(){
         _DISPLAY_SPACING: 1.1,
         _curUIMode: null,
         game: null,
+        TRANSIENT_RNG: null,
+        DATASTORE:{},
 
         display: {
           main: {
@@ -63,6 +65,7 @@ window.onload = function(){
         setRandomSeed: function(s) {
           this._randomSeed = s;
           console.log("using random seed " + this._randomSeed);
+          this.DATASTORE[Game.UIMode.gameSave.RANDOM_SEED_KEY] = this._randomSeed;
           ROT.RNG.setSeed(this._randomSeed);
         },
 
@@ -72,8 +75,8 @@ window.onload = function(){
 
         init: function() {
           this.game = this;
-
-          this.setRandomSeed(5 + Math.floor(Math.random()*100000));
+          this.TRANSIENT_RNG = ROT.RNG.clone();
+          Game.setRandomSeed(5 + Math.floor(this.TRANSIENT_RNG.getUniform()*100000));
           console.log("using random seed "+this._randomSeed);
 
           for(var d_key in  this.display){
@@ -106,8 +109,12 @@ window.onload = function(){
           },
 
           renderMain: function() {
-            if(this._curUIMode){
-              this._curUIMode.render(this.getDisplay("main"));
+            this.display.main.o.clear();
+            if (this._curUIMode === null) {
+              return;
+            }
+            if (this._curUIMode.hasOwnProperty('render')) {
+              this._curUIMode.render(this.display.main.o);
             }
           },
 
@@ -139,15 +146,18 @@ window.onload = function(){
             // set current to new mode
             this._curUIMode = newMode;
             // enter new mode
-            this._curUIMode.enter();
+            if (this._curUIMode !== null) {
+              this._curUIMode.enter();
+            }
             //render everything
             this.renderAll();
-          },
-
+          }
+/*
           toJSON: function() {
             var json = {};
             json._randomSeed = this._randomSeed;
             json[Game.UIMode.gamePlay.JSON_KEY] = Game.UIMode.gamePlay.toJSON();
             return json;
           }
+          */
         };
