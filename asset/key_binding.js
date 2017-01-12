@@ -1,16 +1,19 @@
 //these key binding are intended for just gamePlay at this point
 Game.keyBinding = {
 
-  _curKeys: [
-     {label: 'up', keyUsed: 'w'},
-     {label: 'down', keyUsed: 's'},
-     {label: 'left', keyUsed: 'a'},
-     {label: 'right', keyUsed: 'd'},
-     {label: 'scroll_up', keyUsed: 'i'},
-     {label: 'scroll_down', keyUsed: 'k'},
-     {label: 'save_screen', keyUsed: 't'},
-     {label: 'options', keyUsed: 'q'}
-  ],
+  attr: {
+    _curKeys: [
+      {label: 'up', keyUsed: 'w'},
+      {label: 'down', keyUsed: 's'},
+      {label: 'left', keyUsed: 'a'},
+      {label: 'right', keyUsed: 'd'},
+      {label: 'scroll_up', keyUsed: 'i'},
+      {label: 'scroll_down', keyUsed: 'k'},
+      {label: 'save_screen', keyUsed: 't'},
+      {label: 'options', keyUsed: 'q'}
+    ]
+  },
+
 //it's important to put these templates in the same order as _curKeys
   templates: {
     wasd: [
@@ -37,7 +40,7 @@ Game.keyBinding = {
 
   setTemplate: function(template_name){
     if(this.templates.hasOwnProperty(template_name)){
-      _curKeys = this.templates[template_name];
+      this.attr._curKeys = this.templates[template_name];
     }else{
       console.log("there was a problem setting a key template");
     }
@@ -45,7 +48,7 @@ Game.keyBinding = {
 
 //potentially used to check for repeats
   contains: function(toCheck){
-    var matches = Game.keyBinding._curKeys.filter(
+    var matches = this.attr._curKeys.filter(
       function(elt,idx,arr) { return elt.keyUsed === toCheck; }
     );
     if(matches[0]){
@@ -57,7 +60,7 @@ Game.keyBinding = {
 //this assumes key will be of event type key press
   setKey: function(label_name, key){
     if(!this.contains(key)){
-      var matches = Game.keyBinding._curKeys.filter(
+      var matches = this.attr._curKeys.filter(
         function(elt,idx,arr) { return elt.label === label_name; }
       );
       if(matches[0]){
@@ -71,11 +74,11 @@ Game.keyBinding = {
     }
   },
 
-//these will be important later for saving the game
-  toJSON: function(){
-
+  toJSON: function () {
+    var json = Game.UIMode.gameSave.BASE_toJSON.call(this);
+    return json;
   },
-  fromJSON: function(){
-
-  }
-}
+  fromJSON: function (json) {
+    Game.UIMode.gameSave.BASE_fromJSON.call(this,json);
+  },
+};

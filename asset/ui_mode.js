@@ -8,28 +8,22 @@ Game.UIMode.json_state_data = null;
 
 Game.UIMode.gameStart = {
   enter: function(){
-    console.log("entered game start mode");
-    Game.Message.send("Start Message");
     Game.refresh();
-    console.dir(Game.keyBinding._curKeys[1]['label']);
   },
   exit: function(){
-    console.log("exited game start mode");
   },
   render: function(display){
-    console.log("rendered game start mode");
     display.drawText(5,5,"Welcome");
     display.drawText(5, 6, "press 'n' for a new game and 'l' to load an existing game");
   },
   handleInput: function(inputType, inputData){
-    console.log("handling input in gamestart");
     if (inputType == 'keypress') {
-      if ((inputData.key == 'n') || (inputData.key == 'N') && (inputData.shiftKey)) {
+      if (inputData.key == 'n') {
         Game.UIMode.gameSave.newGame();
       }
-    }
-    else if ((inputData.key == 'l') || (inputData.key == 'L') && (inputData.shiftKey)) {
-      Game.UIMode.gameSave.restoreGame();
+      else if (inputData.key == 'l') {
+        Game.UIMode.gameSave.restoreGame();
+      }
     }
   }
 },
@@ -38,12 +32,13 @@ Game.UIMode.gamePlay = {
   JSON_KEY: 'uiMode_gamePlay',
   attr: {
     _mapId: '',
+    _map_IDs:[], //potentially add an additional identifier on each of these maps
+    //{name:###, id:###}
     _cameraX: 5,
     _cameraY: 5,
     _avatarId: null
   },
   enter: function(){
-    Game.Message.clear();
     if (this.attr._avatarId) {
       this.setCameraToAvatar();
     }
@@ -52,10 +47,30 @@ Game.UIMode.gamePlay = {
   exit: function(){
     Game.refresh();
   },
-  getMap: function () {
-    return Game.DATASTORE.MAP[this.attr._mapId];
+  //these two functions are pretty ugly, look into ways to improve
+  getMap: function (name) {
+    if(name){
+      var matches = this.attr._map_IDs.filter(
+        function(elt,idx,arr) { return elt.name == name; }
+      );
+      if(matches[0]){
+        return Game.DATASTORE.MAP[matches[0].id];
+      }else{
+        console.log("invalid map name");
+      }
+    }else{
+      return Game.DATASTORE.MAP[this.attr._mapId];
+    }
   },
-  setMap: function (m) {
+  setMap: function (m, the_name) {
+    var matches = this.attr._map_IDs.filter(
+      function(elt,idx,arr) { return elt == m; }
+    );
+    if(matches[0]){
+      console.log("map already used");
+    }else{
+      this.attr._map_IDs.push({name:the_name, id:m.getId()});
+    }
     this.attr._mapId = m.getId();
   },
   getAvatar: function () {
@@ -66,14 +81,7 @@ Game.UIMode.gamePlay = {
   },
   render: function(display){
     this.getMap().renderOn(display,this.attr._cameraX,this.attr._cameraY);
-    //this.renderAvatar(display);
   },
-  /*
-  renderAvatar: function (display) {
-    Game.Symbol.AVATAR.draw(display,this.attr.avatar.getX()-this.attr._cameraX+display._options.width/2,
-                                    this.attr.avatar.getY()-this.attr._cameraY+display._options.height/2);
-  },
-  */
   renderAvatarInfo: function (display) {
     var fg = Game.UIMode.DEFAULT_COLOR_FG;
     var bg = Game.UIMode.DEFAULT_COLOR_BG;
@@ -99,41 +107,64 @@ Game.UIMode.gamePlay = {
     this.setCamera(this.getAvatar().getX(),this.getAvatar().getY());
   },
   handleInput: function(inputType, inputData){
-    console.log("handling input in gameplay");
-    if(inputType == 'keypress' || inputType == 'keydown'){ //this is suspect
+    if(inputType == 'keypress'){ //this is suspect
+      this.handleKey(inputData);
+    }else if(inputType == 'keydown'){
+      var handle = false;
       switch(inputData.key){
-        case Game.getKey("up"):
-        this.moveAvatar(0,-1);
-        break;
-        case Game.getKey("left"):
-        this.moveAvatar(-1,0);
-        break;
-        case Game.getKey("down"):
-        this.moveAvatar(0,1);
-        break;
-        case Game.getKey("right"):
-        this.moveAvatar(1,0);
-        break;
-        case Game.getKey("save_screen"):
-        Game.switchUIMode(Game.UIMode.gameSave);
-        break;
-        case Game.getKey("options"):
-        Game.switchUIMode(Game.UIMode.gameOptions);
-        break;
+        case 'ArrowLeft': handle = true; break;
+        case 'ArrowRight': handle = true; break;
+        case 'ArrowUp': handle = true; break;
+        case 'ArrowDown': handle = true; break;
+        case 'Shift': handle = true; break;
+        case 'Control': handle = true; break;
+        case 'Alt': handle = true; break;
+        case 'Shift': handle = true; break;
+        case 'Meta': handle = true; break;
+        case 'Backspace': handle = true; break;
       }
-      Game.refresh();
+      if(handle){
+        this.handleKey(inputData);
+      }
     }
   },
-  /*
-  setupPlay: function (restorationData) {
-    // create map from the tiles
-    this.attr._map =  new Game.Map(Game.Map_Gen.basicMap(this.attr._mapWidth,this.attr._mapHeight));
-    this.attr.avatar = new Game.Entity(Game.EntityTemplates.Avatar);
-    console.dir(this.attr._map);
+  handleKey: function(inputData){
+    switch(inputData.key){
+      case Game.getKey("up"):
+      Game.Message.send("a message");
+      this.moveAvatar(0,-1);
+      break;
+      case Game.getKey("left"):
+      this.moveAvatar(-1,0);
+      break;
+      case Game.getKey("down"):
+      this.setMap(this.attr._maps[0]);
+      //this.moveAvatar(0,1);
+      break;
+      case Game.getKey("right"):
+      var matches = this.attr._map_IDs.filter(
+        function(elt,idx,arr) { return elt == 'second'; }
+      );
+      if(matches[0]){
+        
+      }
+      this.setMap(new Game.Map('justFloor'));
+      //this.moveAvatar(1,0);
+      break;
+      case Game.getKey("save_screen"):
+      Game.switchUIMode(Game.UIMode.gameSave);
+      break;
+      case Game.getKey("options"):
+      Game.switchUIMode(Game.UIMode.gameOptions);
+      break;
+    }
+    Game.refresh();
   },
-  */
+
+  setUpNewMap
+
   setupNewGame: function () {
-    this.setMap(new Game.Map('caves1'));
+    this.setMap(first, new Game.Map('caves1'));
     this.setAvatar(Game.EntityGenerator.create('avatar'));
 
     this.getMap().addEntity(this.getAvatar(),this.getMap().getRandomWalkableLocation());
@@ -156,18 +187,13 @@ Game.UIMode.gamePlay = {
 
 Game.UIMode.gameWin = {
     enter: function(){
-      console.log("entered win mode");
-      Game.Message.clear();
     },
     exit: function(){
-      console.log("exiting win mode");
     },
     render: function(display){
-      console.log("rendered win mode");
       display.drawText(5,5,"You Win");
     },
     handleInput: function(inputType, inputData){
-      console.log("handling input in game win");
     }
 },
 
@@ -225,8 +251,9 @@ Game.UIMode.gameSave = {
     saveGame: function (json_state_data) {
     if (this.localStorageAvailable()) {
       Game.DATASTORE.GAME_PLAY = Game.UIMode.gamePlay.attr;
+      Game.DATASTORE.MESSAGES = Game.Message.attr;
       window.localStorage.setItem(Game._PERSISTANCE_NAMESPACE, JSON.stringify(Game.DATASTORE));
-      Game.switchUiMode(Game.UIMode.gamePlay);
+      Game.switchUIMode(Game.UIMode.gamePlay);
     }
   },
 
@@ -260,12 +287,15 @@ Game.UIMode.gameSave = {
       // game play
       Game.UIMode.gamePlay.attr = state_data.GAME_PLAY;
 
-      Game.switchUiMode(Game.UIMode.gamePlay);
+      //messages
+      Game.Message.attr = state_data.MESSAGES;
+
+      Game.switchUIMode(Game.UIMode.gamePlay);
     }
   },
 
   newGame: function (){
-    Game.setRandomSeed(5 + Math.floor(ROT.RNG.getUniform()*100000));
+    Game.setRandomSeed(5 + Math.floor(Game.TRANSIENT_RNG.getUniform()*100000));
     Game.UIMode.gamePlay.setupNewGame();
     Game.switchUIMode(Game.UIMode.gamePlay);
   },
@@ -304,47 +334,43 @@ Game.UIMode.gameOptions = {
   selected_function: 0,
 
   enter: function(){
-    console.log("entered options mode");
     Game.getDisplay('main').clear();
     //Game.Message.clear();
     this.selected_function=0,
     Game.refresh();
   },
   exit: function(){
-    console.log("exiting options mode");
   },
   render: function(display){
-    console.log("rendered options mode");
-
 //update this later
     Game.getDisplay('main').clear(); //this could probably be handled more nicely
 
     display.drawText(1,1,"Key Bindings (use tab to scroll)");
 
-    key: null;
-    for(var i = 0; i<Game.keyBinding._curKeys.length; i++){
-      key=Game.keyBinding._curKeys[i].label;
-      if(key != Game.keyBinding._curKeys[this.selected_function].label){
-        display.drawText(1,2+i,Game.keyBinding._curKeys[i].label+": "+Game.keyBinding._curKeys[i].keyUsed);
+    var key = null;
+    var kb = Game.keyBinding.attr._curKeys;
+    for(var i = 0; i<kb.length; i++){
+      key=Game.keyBinding.attr._curKeys[i].label;
+      if(key != kb[this.selected_function].label){
+        display.drawText(1,2+i,kb[i].label+": "+kb[i].keyUsed);
       }else{
-        display.drawText(1,2+i,"%b{blue}"+Game.keyBinding._curKeys[i].label+": "+Game.keyBinding._curKeys[i].keyUsed);
+        display.drawText(1,2+i,"%b{blue}"+kb[i].label+": "+kb[i].keyUsed);
       }
     }
   },
   handleInput: function(inputType, inputData){
-    console.log("handling input in game options");
-    //Game.Message.clear();
+    var kb = Game.keyBinding.attr._curKeys;
     if (inputType == 'keypress') {
       //this would also be the place to exclude any other keys that shouldn't be
       //modified
-      if(inputData.key == 'p'){
-        if(this.selected_function+1 < Game.keyBinding._curKeys.length){
+      if(inputData.key == ' '){
+        if(this.selected_function+1 < kb.length){
           this.selected_function++;
         }else{
           this.selected_function=0;
         }
       }else{
-        Game.keyBinding.setKey(Game.keyBinding._curKeys[this.selected_function].label, inputData.key);
+        Game.keyBinding.setKey(kb[this.selected_function].label, inputData.key);
       }
     }
     Game.refresh();

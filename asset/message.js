@@ -1,22 +1,25 @@
 Game.Message = {
-  _curMessages: [],
-  _messageNum: 1,
+  attr: {
+    _curMessages: [],
+    _messageNum: 0
+  },
+
   render: function (display) {
     display.clear();
-    if(this._curMessages.length != 0){
+    if(this.attr._curMessages.length != 0){
       display.drawText(1,1,
-        this._curMessages.slice(this._messageNum, this._messageNum+Game.display.message.h).join("\n"),
+        this.attr._curMessages.slice(this.attr._messageNum, this.attr._messageNum+Game.display.message.h).join("\n"),
         '#fff','#000');
     }
   },
   //can't handle a hash of messages
   send: function (msg) {
-    this._curMessages.push(msg);
+    this.attr._curMessages.push(msg);
   },
   clear: function () {
-    this._curMessages = [];
+    this.attr._curMessages = [];
   },
   setDisplayedMessage: function(newNum){
-    this._messageNum = newNum;
+    this.attr._messageNum = newNum;
   }
 };
