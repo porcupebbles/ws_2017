@@ -9,6 +9,7 @@ Game.UIMode.json_state_data = null;
 Game.UIMode.gameStart = {
   enter: function(){
     Game.refresh();
+    console.dir(Game.getKey("up"));
   },
   exit: function(){
   },
@@ -32,8 +33,8 @@ Game.UIMode.gamePlay = {
   JSON_KEY: 'uiMode_gamePlay',
   attr: {
     _mapId: '',
-    _map_IDs:[], //potentially add an additional identifier on each of these maps
-    //{name:###, id:###}
+    _map_IDs:[],
+    //{name:###, id:###} maybe add a last avatar position too based on gameplay
     _cameraX: 5,
     _cameraY: 5,
     _avatarId: null
@@ -48,30 +49,33 @@ Game.UIMode.gamePlay = {
     Game.refresh();
   },
   //these two functions are pretty ugly, look into ways to improve
-  getMap: function (name) {
+  //use ID get map
+  getMap: function (the_name) {
     if(name){
-      var matches = this.attr._map_IDs.filter(
-        function(elt,idx,arr) { return elt.name == name; }
-      );
-      if(matches[0]){
-        return Game.DATASTORE.MAP[matches[0].id];
+      var match = this.attr._map_IDs.find('name', the_name);
+      if(match){
+        return Game.DATASTORE.MAP[match.id];
       }else{
         console.log("invalid map name");
+        return null;
       }
     }else{
       return Game.DATASTORE.MAP[this.attr._mapId];
     }
   },
-  setMap: function (m, the_name) {
-    var matches = this.attr._map_IDs.filter(
-      function(elt,idx,arr) { return elt == m; }
-    );
-    if(matches[0]){
-      console.log("map already used");
+  setMap: function (the_name, map) {
+    //maybe set camera to avatar here
+    if(map){
+      this.attr._map_IDs.push({name:the_name, id:map.getId()});
+      this.attr._mapId = map.getId();
     }else{
-      this.attr._map_IDs.push({name:the_name, id:m.getId()});
+      var match = this.attr._map_IDs.find('name', the_name);
+      if(match){
+        this.attr._mapId = match.id;
+      }else{
+        console.log("invalid map name");
+      }
     }
-    this.attr._mapId = m.getId();
   },
   getAvatar: function () {
     return Game.DATASTORE.ENTITY[this.attr._avatarId];
@@ -107,7 +111,9 @@ Game.UIMode.gamePlay = {
     this.setCamera(this.getAvatar().getX(),this.getAvatar().getY());
   },
   handleInput: function(inputType, inputData){
-    if(inputType == 'keypress'){ //this is suspect
+    console.dir(inputType);
+    console.dir(inputData);
+    if(inputType == 'keypress'){
       this.handleKey(inputData);
     }else if(inputType == 'keydown'){
       var handle = false;
@@ -138,17 +144,15 @@ Game.UIMode.gamePlay = {
       this.moveAvatar(-1,0);
       break;
       case Game.getKey("down"):
-      this.setMap(this.attr._maps[0]);
+      this.setMap('first');
       //this.moveAvatar(0,1);
       break;
       case Game.getKey("right"):
-      var matches = this.attr._map_IDs.filter(
-        function(elt,idx,arr) { return elt == 'second'; }
-      );
-      if(matches[0]){
-        
+      if(!this.getMap('second')){
+        this.setMap('second', new Game.Map('justFloor'));
+      }else{
+        this.setMap('second');
       }
-      this.setMap(new Game.Map('justFloor'));
       //this.moveAvatar(1,0);
       break;
       case Game.getKey("save_screen"):
@@ -161,10 +165,8 @@ Game.UIMode.gamePlay = {
     Game.refresh();
   },
 
-  setUpNewMap
-
   setupNewGame: function () {
-    this.setMap(first, new Game.Map('caves1'));
+    this.setMap('first', new Game.Map('caves1'));
     this.setAvatar(Game.EntityGenerator.create('avatar'));
 
     this.getMap().addEntity(this.getAvatar(),this.getMap().getRandomWalkableLocation());

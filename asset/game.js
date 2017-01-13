@@ -92,11 +92,9 @@ var Game = {
   },
 
   getKey: function (label_name){
-    var matches = Game.keyBinding.attr._curKeys.filter(
-      function(elt,idx,arr) { return elt.label === label_name; }
-    );
-    if(matches[0]){
-      return matches[0].keyUsed;
+    var theSet = Game.keyBinding.attr._curKeys.find("label", label_name);
+    if(theSet){
+      return theSet.keyUsed;
     }
     return null;
   },
