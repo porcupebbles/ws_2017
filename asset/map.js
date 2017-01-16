@@ -1,7 +1,7 @@
 Game.DATASTORE.MAP = {};
 
 Game.Map = function (mapTileSetName) {
-  this._tiles = Game.MapTileSets[mapTileSetName].getMapTiles();
+  this._tiles = Game.MapTileSets[mapTileSetName].getMapInfo().tiles;
   this.attr = {
     _width: this._tiles.length,
     _height: this._tiles[0].length,
@@ -104,6 +104,14 @@ Game.Map.prototype.renderOn = function (display,camX,camY) {
       if (ent) {
         ent.draw(display,x,y);
       }
+    }
+  }
+};
+
+Game.Map.prototype.setArray = function(featureArray, x, y){
+  for(var i = 0; i < featureArray.length; i++){
+    for(var j = 0; j < featureArray[0].length; j++){
+      this._tiles[x+i][y+j] = featureArray[i][j];
     }
   }
 };

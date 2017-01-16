@@ -21,7 +21,7 @@ Game.MapTileSets = {
   caves1: {
     _width: 50,
     _height: 50,
-    getMapTiles: function () {
+    getMapInfo: function () {
       var mapTiles = Game.util.init2DArray(this._width,this._height,Game.Tile.nullTile);
       var generator = new ROT.Map.Cellular(this._width,this._height);
       generator.randomize(0.5);
@@ -41,17 +41,30 @@ Game.MapTileSets = {
         }
       });
 
-      return mapTiles;
+      return {rooms: [] tiles: mapTiles}; //should also pass info about room location and
+                                //block size
+          //rooms will be an array of objects constaining the upperleft coordinate,
+          //block dimensions, width and height, and a 2-d array of blocks (for blocks
+          // with different properties)
+          // so {coord: {x:_,y:_}, blockdim:{x:_, y:_}, blocks: 2-d array}
     }
   },
 
   justFloor: {
     _width: 50,
     _height: 50,
-    getMapTiles: function () {
+    getMapInfo: function () {
       var mapTiles = Game.util.init2DArray(this._width,this._height,Game.Tile.floorTile);
 
-      return mapTiles;
+      var testRoom = new Game.Room('basicRoom', {x:2, y:2});
+
+      for(var i = 0; i < testRoom.getWidth(); i++){
+        for(var j = 0; j < testRoom.getHeight(); j++){
+          this._tiles[x+i][y+j] = featureArray[i][j];
+        }
+      }
+
+      return {tiles: mapTiles};
     }
   }
 };
