@@ -51,8 +51,10 @@ Game.UIMode.gamePlay = {
   //these two functions are pretty ugly, look into ways to improve
   //use ID get map
   getMap: function (the_name) {
-    if(name){
+    console.log("got here");
+    if(the_name){
       var match = this.attr._map_IDs.find('name', the_name);
+      //console.dir(match);
       if(match){
         return Game.DATASTORE.MAP[match.id];
       }else{
@@ -70,12 +72,14 @@ Game.UIMode.gamePlay = {
       this.attr._mapId = map.getId();
     }else{
       var match = this.attr._map_IDs.find('name', the_name);
+      console.dir(match);
       if(match){
         this.attr._mapId = match.id;
       }else{
         console.log("invalid map name");
       }
     }
+    console.dir(this.attr._map_IDs);
   },
   getAvatar: function () {
     return Game.DATASTORE.ENTITY[this.attr._avatarId];
@@ -147,7 +151,7 @@ Game.UIMode.gamePlay = {
       this.setMap('first');
       //this.moveAvatar(0,1);
       break;
-      case Game.getKey("right"):
+      case Game.getKey('right'):
       if(!this.getMap('second')){
         this.setMap('second', new Game.Map('justFloor'));
       }else{
