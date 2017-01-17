@@ -1,14 +1,16 @@
 Game.DATASTORE.MAP = {};
 
 Game.Map = function (mapTileSetName) {
-  this._tiles = Game.MapTileSets[mapTileSetName].getMapInfo().tiles;
+  info = Game.MapTileSets[mapTileSetName].getMapInfo();
+  this._tiles = info.tiles;
   this.attr = {
     _width: this._tiles.length,
     _height: this._tiles[0].length,
     _id: Game.util.randomString(32),
     _mapTileSetName: mapTileSetName,
     _entitiesByLocation: {},
-    _locationsByEntity: {}
+    _locationsByEntity: {},
+    _rooms: info.rooms || null
   };
 
   Game.DATASTORE.MAP[this.attr._id] = this;

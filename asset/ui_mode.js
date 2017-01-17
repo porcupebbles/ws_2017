@@ -51,7 +51,7 @@ Game.UIMode.gamePlay = {
   //these two functions are pretty ugly, look into ways to improve
   //use ID get map
   getMap: function (the_name) {
-    console.log("got here");
+    //console.log("got here");
     if(the_name){
       var match = this.attr._map_IDs.find('name', the_name);
       //console.dir(match);
@@ -79,7 +79,7 @@ Game.UIMode.gamePlay = {
         console.log("invalid map name");
       }
     }
-    console.dir(this.attr._map_IDs);
+    //console.dir(this.attr._map_IDs);
   },
   getAvatar: function () {
     return Game.DATASTORE.ENTITY[this.attr._avatarId];
@@ -115,8 +115,8 @@ Game.UIMode.gamePlay = {
     this.setCamera(this.getAvatar().getX(),this.getAvatar().getY());
   },
   handleInput: function(inputType, inputData){
-    console.dir(inputType);
-    console.dir(inputData);
+    //console.dir(inputType);
+    //console.dir(inputData);
     if(inputType == 'keypress'){
       this.handleKey(inputData);
     }else if(inputType == 'keydown'){
@@ -148,16 +148,18 @@ Game.UIMode.gamePlay = {
       this.moveAvatar(-1,0);
       break;
       case Game.getKey("down"):
-      this.setMap('first');
-      //this.moveAvatar(0,1);
+      //this.setMap('first');
+      this.moveAvatar(0,1);
       break;
       case Game.getKey('right'):
+      /*
       if(!this.getMap('second')){
-        this.setMap('second', new Game.Map('justFloor'));
+        this.setMap('second', new Game.Map('basicTunnel'));
       }else{
         this.setMap('second');
       }
-      //this.moveAvatar(1,0);
+      */
+      this.moveAvatar(1,0);
       break;
       case Game.getKey("save_screen"):
       Game.switchUIMode(Game.UIMode.gameSave);
@@ -170,7 +172,7 @@ Game.UIMode.gamePlay = {
   },
 
   setupNewGame: function () {
-    this.setMap('first', new Game.Map('caves1'));
+    this.setMap('first', new Game.Map('basicTunnel'));
     this.setAvatar(Game.EntityGenerator.create('avatar'));
 
     this.getMap().addEntity(this.getAvatar(),this.getMap().getRandomWalkableLocation());
