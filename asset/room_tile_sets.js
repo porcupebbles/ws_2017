@@ -11,7 +11,7 @@ Game.RoomTileSets = {
         var blocdim = {width: 4, height: 4};
 
         //the 2-d array here will get more complex
-        return {block_dim: blocdim, tiles: Game.util.init2DArray(this._width, this._height, Game.Tile.floorTile),
+        return {block_dim: blocdim, tiles: Game.util.init2DArray(this._width, this._height, Game.Tile.roomFloor),
         width: this._width, height: this._height};
       }
     }

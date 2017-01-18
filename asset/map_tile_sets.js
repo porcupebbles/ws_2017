@@ -94,7 +94,7 @@ Game.MapTileSets = {
         var xLimit = (this._width - Game.RoomTileSets[room_name]._width);
         var yLimit = (this._height - Game.RoomTileSets[room_name]._height);
 
-        //console.dir(placement);
+        console.dir(placement);
         while(   (placement.x > xLimit) || (placement.y > yLimit))
         {
           placement = valid_placements[Game.util.randomInt(0, valid_placements.length)];
@@ -102,13 +102,9 @@ Game.MapTileSets = {
         var oneRoom = new Game.Room(room_name, placement);
         mapTiles = Game.MapTileSets.setFeature(mapTiles, oneRoom.getTiles(), oneRoom.getPos());
 
-        for(var j = 0; j < valid_placements.length; j++){
-          if(oneRoom.contains(valid_placements[j])){
-            valid_placements.splice(j, 1);
-          }
-        }
-        console.dir(valid_placements);
+        valid_placements = valid_placements.filter(function(elt,idx,arr) {return !oneRoom.surrounds(elt); });
       }
+      
       //will need to sort which directions work
       var random_dir = Game.util.randomInt(1, 4);
       switch (random_dir) {
@@ -124,7 +120,7 @@ Game.MapTileSets = {
 
 
 
-      mapTiles = Game.MapTileSets.setFeature(mapTiles, oneRoom.getTiles(), oneRoom.getPos());
+      //mapTiles = Game.MapTileSets.setFeature(mapTiles, oneRoom.getTiles(), oneRoom.getPos());
       return {tiles: mapTiles, rooms: oneRoom}; //will need to define the map the room is on
     }
   }

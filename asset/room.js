@@ -13,6 +13,10 @@ Game.Room = function(roomTileSetName, pos, map){
   }
 };
 
+Game.Room.prototype.getMap = function(){
+return this.attr._map;
+};
+
 Game.Room.prototype.setMap = function(map){
   this.attr._map = map;
 };
@@ -53,6 +57,20 @@ Game.Room.prototype.surrounds = function(pos){
   var thispos = this.getPos();
   return pos.x >= (thispos.x-1) && pos.x <= (thispos.x + this.getWidth() + 1) &&
   pos.y >= (thispos.y-1) && pos.y <= (thispos.y + this.getHeight() + 1);
+};
+
+Game.Room.prototype.randomValidAdjacent = function(){
+  var allAdjacent = [];
+  for(var i = this.getPos().x; i < this.getPos().x + this.getWidth(); i++){
+    allAdjacent.push({x: i, y: this.getPos().y - 1});
+    allAdjacent.push({x: i, y: this.getPos().y + this.getHeight() + 1});
+  }
+  for(var i = this.getPos().y; i < this.getPos().y + this.getHeight(); i++){
+    allAdjacent.push({x: this.getPos().x-1, y: i});
+    allAdjacent.push({x: this.getPos().x + this.getWidth() + 1, y: i});
+  }
+  var theOne = allAdjacent[Game.util.randomInt(0, allAdjacent.length)];
+
 };
 
 //this is where the tiles are drawn onto the map

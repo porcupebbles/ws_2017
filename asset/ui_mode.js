@@ -142,14 +142,17 @@ Game.UIMode.gamePlay = {
     switch(inputData.key){
       case Game.getKey("up"):
       Game.Message.send("a message");
-      this.moveAvatar(0,-1);
+      //this.moveAvatar(0,-1);
+      this.moveCamera(0, -1);
       break;
       case Game.getKey("left"):
-      this.moveAvatar(-1,0);
+      //this.moveAvatar(-1,0);
+      this.moveCamera(-1, 0);
       break;
       case Game.getKey("down"):
       //this.setMap('first');
-      this.moveAvatar(0,1);
+      //this.moveAvatar(0,1);
+      this.moveCamera(0, 1);
       break;
       case Game.getKey('right'):
       /*
@@ -159,7 +162,8 @@ Game.UIMode.gamePlay = {
         this.setMap('second');
       }
       */
-      this.moveAvatar(1,0);
+      //this.moveAvatar(1,0);
+      this.moveCamera(1, 0);
       break;
       case Game.getKey("save_screen"):
       Game.switchUIMode(Game.UIMode.gameSave);
