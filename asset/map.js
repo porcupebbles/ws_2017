@@ -2,6 +2,7 @@ Game.DATASTORE.MAP = {};
 
 Game.Map = function (mapTileSetName) {
   info = Game.MapTileSets[mapTileSetName].getMapInfo();
+  console.dir(JSON.parse(JSON.stringify(info)));
   this._tiles = info.tiles;
   this.attr = {
     _width: this._tiles.length,
@@ -13,7 +14,24 @@ Game.Map = function (mapTileSetName) {
     _rooms: info.rooms || null
   };
 
+  for(var i = 0; i < this.attr._rooms.length; i++){
+    this.attr._rooms[i].setMap(this);
+  }
+
   Game.DATASTORE.MAP[this.attr._id] = this;
+};
+
+Game.Map.prototype.getRoom = function(pos){
+  for(var i = 0; i < this.attr._rooms.length; i++){
+    if(this.attr._rooms[i].contains(pos)){
+      return this.attr._rooms[i];
+    }
+  }
+  return null;
+};
+
+Game.Map.prototype.getRooms = function(){
+  return this.attr._rooms;
 };
 
 Game.Map.prototype.getId = function () {

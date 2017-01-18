@@ -18,6 +18,14 @@ Game.Symbol.prototype.getBg = function () {
   return this.attr._bg;
 };
 
+Game.Symbol.prototype.setFg = function (color){
+  this.attr._fg = color;
+};
+
+Game.Symbol.prototype.setBg = function (color){
+  this.attr._bg = color;
+};
+
 Game.Symbol.prototype.draw = function (display,dispx,dispy) {
   display.draw(dispx,dispy,this.attr._char,this.attr._fg,this.attr._bg);
 };

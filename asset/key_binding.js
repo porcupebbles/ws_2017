@@ -10,7 +10,8 @@ Game.keyBinding = {
       {label: 'scroll_up', keyUsed: 'i'},
       {label: 'scroll_down', keyUsed: 'k'},
       {label: 'save_screen', keyUsed: 't'},
-      {label: 'options', keyUsed: 'q'}
+      {label: 'options', keyUsed: 'q'},
+      {label: 'swap', keyUsed: ' '}
     ]
   },
 
@@ -24,7 +25,8 @@ Game.keyBinding = {
        {label: 'scroll_up', keyUsed: 'i'},
        {label: 'scroll_down', keyUsed: 'k'},
        {label: 'save_screen', keyUsed: 't'},
-       {label: 'options', keyUsed: 'q'}
+       {label: 'options', keyUsed: 'q'},
+       {label: 'swap', keyUsed: ' '}
     ],
     arrows: [
        {label: 'up', keyUsed: 'ArrowUp'},
@@ -34,7 +36,8 @@ Game.keyBinding = {
        {label: 'scroll_up', keyUsed: 'i'},
        {label: 'scroll_down', keyUsed: 'k'},
        {label: 'save_screen', keyUsed: 't'},
-       {label: 'options', keyUsed: 'q'}
+       {label: 'options', keyUsed: 'q'},
+       {label: 'swap', keyUsed: ' '}
     ]
   },
 

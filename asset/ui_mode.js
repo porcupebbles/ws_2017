@@ -9,7 +9,6 @@ Game.UIMode.json_state_data = null;
 Game.UIMode.gameStart = {
   enter: function(){
     Game.refresh();
-    console.dir(Game.getKey("up"));
   },
   exit: function(){
   },
@@ -37,7 +36,9 @@ Game.UIMode.gamePlay = {
     //{name:###, id:###} maybe add a last avatar position too based on gameplay
     _cameraX: 5,
     _cameraY: 5,
-    _avatarId: null
+    _avatarId: null,
+    _inSwap: false,
+    _firstSwap: null
   },
   enter: function(){
     if (this.attr._avatarId) {
@@ -141,18 +142,41 @@ Game.UIMode.gamePlay = {
   handleKey: function(inputData){
     switch(inputData.key){
       case Game.getKey("up"):
-      Game.Message.send("a message");
-      //this.moveAvatar(0,-1);
-      this.moveCamera(0, -1);
+      if(this.attr._inSwap){
+        if(this.attr._firstSwap){
+
+        }else{
+
+        }
+
+      }else{
+        //this.moveAvatar(0,-1);
+        this.moveCamera(0, -1);
+      }
       break;
       case Game.getKey("left"):
-      //this.moveAvatar(-1,0);
-      this.moveCamera(-1, 0);
+      if(this.attr._inSwap){
+        if(this.attr._firstSwap){
+
+        }else{
+
+        }
+      }else{
+        //this.moveAvatar(-1,0);
+        this.moveCamera(-1, 0);
+      }
       break;
       case Game.getKey("down"):
-      //this.setMap('first');
-      //this.moveAvatar(0,1);
-      this.moveCamera(0, 1);
+      if(this.attr._inSwap){
+        if(this.attr._firstSwap){
+
+        }else{
+
+        }
+      }else{
+        //this.moveAvatar(0,1);
+        this.moveCamera(0, 1);
+      }
       break;
       case Game.getKey('right'):
       /*
@@ -162,11 +186,21 @@ Game.UIMode.gamePlay = {
         this.setMap('second');
       }
       */
-      //this.moveAvatar(1,0);
-      this.moveCamera(1, 0);
+      if(this.attr._inSwap){
+        if(this.attr._firstSwap){
+
+        }else{
+
+        }
+      }else{
+        //this.moveAvatar(1,0);
+        this.moveCamera(1, 0);
+      }
       break;
       case Game.getKey("save_screen"):
-      Game.switchUIMode(Game.UIMode.gameSave);
+      //Game.switchUIMode(Game.UIMode.gameSave);
+      console.dir(this.getMap().getRoom(this.getAvatar().getPos()));
+      this.getMap().getRoom(this.getAvatar().getPos()).swap({x:1, y:1}, {x:2, y:1});
       break;
       case Game.getKey("options"):
       Game.switchUIMode(Game.UIMode.gameOptions);
@@ -176,16 +210,20 @@ Game.UIMode.gamePlay = {
   },
 
   setupNewGame: function () {
-    this.setMap('first', new Game.Map('basicTunnel'));
+    this.setMap('first', new Game.Map('rooms'));
+    console.log("this works");
+    console.dir(this.getMap());
+
     this.setAvatar(Game.EntityGenerator.create('avatar'));
 
     this.getMap().addEntity(this.getAvatar(),this.getMap().getRandomWalkableLocation());
     this.setCameraToAvatar();
-
+    /*
     // dev code - just add some entities to the map
     for (var ecount = 0; ecount < 80; ecount++) {
       this.getMap().addEntity(Game.EntityGenerator.create('moss'),this.getMap().getRandomWalkableLocation());
     }
+    */
 
   },
 

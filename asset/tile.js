@@ -29,9 +29,9 @@ Game.Tile.prototype.isRoom = function() {
 Game.Tile.nullTile = new Game.Tile({name:'nullTile'});
 Game.Tile.floorTile = new Game.Tile({name:'floor', chr:'.', walkable:true});
 Game.Tile.wallTile = new Game.Tile({name:'wall',chr:'#'});
-Game.Tile.hallTile = new Game.Tile({name: 'hall', chr: '.', hall: true });
+Game.Tile.hallTile = new Game.Tile({name: 'hall', chr: '.', hall: true , walkable: true});
 
-Game.Tile.roomFloor = new Game.Tile({name: 'roomFloor', chr: '.', room: true});
-Game.Tile.roomWall = new Game.Tile({name: 'roomWall', chr:'#', room: true});
+Game.Tile.roomFloor = new Game.Tile({name: 'roomFloor', chr: '.', room: true, walkable: true, fg: '#605db1'});
+Game.Tile.roomWall = new Game.Tile({name: 'roomWall', chr:'#', room: true, fg: '#605db1'});
 
 Game.Tile.testTile = new Game.Tile({name:'test',chr:'M', walkable:true});

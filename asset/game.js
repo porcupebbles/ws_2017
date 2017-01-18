@@ -74,6 +74,7 @@ var Game = {
   },
 
   init: function() {
+    console.log("works this much");
     this.game = this;
     this.TRANSIENT_RNG = ROT.RNG.clone();
 

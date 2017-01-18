@@ -22,6 +22,7 @@ Game.MapTileSets = {
     _height: 50,
     getMapInfo: function () {
       var mapTiles = Game.util.init2DArray(this._width,this._height,Game.Tile.nullTile);
+      console.dir(mapTiles);
       var generator = new ROT.Map.Cellular(this._width,this._height);
       generator.randomize(0.5);
 
@@ -40,6 +41,7 @@ Game.MapTileSets = {
         }
       });
 
+console.dir({rooms: [], tiles: mapTiles});
       return {rooms: [], tiles: mapTiles}; //should also pass info about room location and
                                 //block size
           //rooms will be an array of objects constaining the upperleft coordinate,
@@ -53,7 +55,7 @@ Game.MapTileSets = {
     _width: 50,
     _height: 50,
     getMapInfo: function () {
-      var mapTiles = Game.util.init2DArray(this._width,this._height,Game.Tile.floorTile);
+      var mapTiles = Game.util.init2DArray(this._width,this._height,Game.Tile.roomFloor);
 
 /*
       var testRoom = new Game.Room('basicRoom', {x:2, y:2});
@@ -72,7 +74,6 @@ Game.MapTileSets = {
   basicTunnel: {
     _width: 100,
     _height: 100,
-    _room_num: 1,
     getMapInfo: function () {
       var mapTiles = Game.util.init2DArray(this._width,this._height,Game.Tile.wallTile);
 
@@ -104,7 +105,7 @@ Game.MapTileSets = {
 
         valid_placements = valid_placements.filter(function(elt,idx,arr) {return !oneRoom.surrounds(elt); });
       }
-      
+
       //will need to sort which directions work
       var random_dir = Game.util.randomInt(1, 4);
       switch (random_dir) {
@@ -122,6 +123,36 @@ Game.MapTileSets = {
 
       //mapTiles = Game.MapTileSets.setFeature(mapTiles, oneRoom.getTiles(), oneRoom.getPos());
       return {tiles: mapTiles, rooms: oneRoom}; //will need to define the map the room is on
+    }
+  },
+
+  rooms: {
+    _width: 100,
+    _height: 20,
+    getMapInfo: function(){
+      var mapTiles = Game.util.init2DArray(this._width, this._height, Game.Tile.wallTile);
+
+      var all_rooms = [];
+
+      var room_name = 'diagonalRoom';
+      var x_pos = 0;
+      console.log("got here at least");
+      for(var i = 0; i < 5; i++){
+        //console.log(i, ".", 1)
+        var room = new Game.Room(room_name, {x:x_pos, y:0});
+        //console.dir(room);
+        //console.log(i, ".", 2)
+        all_rooms.push(room);
+        mapTiles = Game.MapTileSets.setFeature(mapTiles, room.getTiles(), room.getPos());
+        //console.log(i, ".", 3)
+        if(i !== 4){
+          mapTiles = Game.MapTileSets.setFeature(mapTiles, Game.util.init2DArray(2, 1, Game.Tile.hallTile), {x:x_pos+room.getWidth(), y: 5});
+        }
+        //console.log(i, ".", 4)
+        x_pos = x_pos + room.getWidth() + 2;
+      }
+
+      return {tiles: mapTiles, rooms: all_rooms};
     }
   }
 };
