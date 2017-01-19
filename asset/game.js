@@ -37,6 +37,8 @@ var Game = {
   game: null,
   TRANSIENT_RNG: null,
   DATASTORE:{},
+  Scheduler: null,
+  TimeEngine: null,
 
   display: {
     main: {
@@ -85,6 +87,12 @@ var Game = {
     this.renderAll();
   },
 
+  initializeTimingEngine: function () {
+    // NOTE: single, central timing system for now - might have to refactor this later to deal with mutliple map stuff
+    Game.Scheduler = new ROT.Scheduler.Action();
+    Game.TimeEngine = new ROT.Engine(Game.Scheduler);
+  },
+
   getDisplay: function (displayId) {
     if (this.display.hasOwnProperty(displayId)) {
       return this.display[displayId].o;
@@ -128,10 +136,18 @@ var Game = {
     Game.Message.render(this.display.message.o);
   },
 
+  hideDisplayMessage: function() {
+    this._display.message.o.clear();
+  },
+
   renderAll: function(){
     this.renderAvatar();
     this.renderMain();
     this.renderMessage();
+  },
+
+  getAvatar: function () {
+    return Game.UIMode.gamePlay.getAvatar();
   },
 
   switchUIMode: function(newMode){

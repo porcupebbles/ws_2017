@@ -26,9 +26,15 @@ Game.Symbol.prototype.setBg = function (color){
   this.attr._bg = color;
 };
 
-Game.Symbol.prototype.draw = function (display,dispx,dispy) {
-  display.draw(dispx,dispy,this.attr._char,this.attr._fg,this.attr._bg);
+Game.Symbol.prototype.draw = function (display,disp_x,disp_y,isMasked) {
+  if (isMasked) {
+    display.draw(disp_x,disp_y,this.attr._char,'#444','#000');
+  } else {
+    display.draw(disp_x,disp_y,this.attr._char,this.attr._fg,this.attr._bg);
+  }
 };
 
 Game.Symbol.NULL_SYMBOL = new Game.Symbol();
 Game.Symbol.AVATAR = new Game.Symbol({chr:'@', fg:'#dda'});
+
+Game.Symbol.ITEM_PILE = new Game.Symbol({chr:'&',fg:'#dcc'});

@@ -70,8 +70,8 @@ Game.Room.prototype.setBlock = function(block, x, y){
 
 Game.Room.prototype.contains = function(pos){
   var thispos = this.getPos();
-  return pos.x >= thispos.x && pos.x <= thispos.x + this.getWidth() &&
-  pos.y >= thispos.y && pos.y <= thispos.y + this.getHeight();
+  return pos.x >= thispos.x && pos.x < thispos.x + this.getWidth() &&
+  pos.y >= thispos.y && pos.y < thispos.y + this.getHeight();
 };
 
 Game.Room.prototype.surrounds = function(pos){
@@ -101,9 +101,9 @@ Game.Room.prototype.swap = function(entry1, entry2){
   var block1 = this.getBlock(entry1.x, entry1.y);
   var block2 = this.getBlock(entry2.x, entry2.y);
 
-  this.getMap().setArray(block1.tiles, block2.pos.x + this.attr._x, block2.pos.y + this.attr._y);
+  //this.getMap().setArray(block1.tiles, block2.pos.x + this.attr._x, block2.pos.y + this.attr._y);
   this.setArray(block1.tiles, block2.pos.x, block2.pos.y);
-  this.getMap().setArray(block2.tiles, block1.pos.x + this.attr._x, block1.pos.y + this.attr._y);
+  //this.getMap().setArray(block2.tiles, block1.pos.x + this.attr._x, block1.pos.y + this.attr._y);
   this.setArray(block2.tiles, block1.pos.x, block1.pos.y);
 
   //handle entities here
@@ -132,6 +132,9 @@ Game.Room.prototype.setArray = function(featureArray, x, y){
   for(var i = 0; i < featureArray.length; i++){
     for(var j = 0; j < featureArray[0].length; j++){
       this.attr._tiles[x+i][y+j] = featureArray[i][j];
+      if(this.getMap()){
+        this.getMap().getTiles()[x+i+this.getPos().x][y+j+this.getPos().y] = featureArray[i][j];
+      }
     }
   }
 };

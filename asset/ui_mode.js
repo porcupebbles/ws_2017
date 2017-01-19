@@ -38,15 +38,21 @@ Game.UIMode.gamePlay = {
     _cameraY: 5,
     _avatarId: null,
     _inSwap: false,
-    _firstSwap: null
+    _firstSwap: null,
+
+    //these are questionable
+    _firstSwap_coords: null,
+    _secondSwap_coords: null
   },
   enter: function(){
     if (this.attr._avatarId) {
       this.setCameraToAvatar();
     }
+    Game.TimeEngine.unlock();
     Game.refresh();
   },
   exit: function(){
+    Game.TimeEngine.lock();
     Game.refresh();
   },
   //these two functions are pretty ugly, look into ways to improve
@@ -65,6 +71,9 @@ Game.UIMode.gamePlay = {
     }else{
       return Game.DATASTORE.MAP[this.attr._mapId];
     }
+  },
+  getCurrentRoom: function(){
+    return this.getMap().getRoom(this.getAvatar().getPos());
   },
   setMap: function (the_name, map) {
     //maybe set camera to avatar here
@@ -89,7 +98,12 @@ Game.UIMode.gamePlay = {
     this.attr._avatarId = a.getId();
   },
   render: function(display){
-    this.getMap().renderOn(display,this.attr._cameraX,this.attr._cameraY);
+    var seenCells = this.getAvatar().getVisibleCells();
+    this.getMap().renderOn(display,this.attr._cameraX,this.attr._cameraY,{
+      visibleCells:seenCells,
+      maskedCells:this.getAvatar().getRememberedCoordsForMap()
+      });
+    this.getAvatar().rememberCoords(seenCells);
   },
   renderAvatarInfo: function (display) {
     var fg = Game.UIMode.DEFAULT_COLOR_FG;
@@ -99,10 +113,15 @@ Game.UIMode.gamePlay = {
     display.drawText(1,4,"Turns: " + this.getAvatar().getTurns(),fg,bg);
     display.drawText(1,5,"HP: " + this.getAvatar().getCurHp(),fg,bg);
   },
-  moveAvatar: function (dx,dy) {
-    if(this.getAvatar().tryWalk(this.getMap(), dx, dy)){
+  moveAvatar: function (pdx,pdy) {
+    // console.log('moveAvatar '+pdx+','+pdy);
+    var moveResp = this.getAvatar().raiseSymbolActiveEvent('adjacentMove',{dx:pdx,dy:pdy});
+    // if (this.getAvatar().tryWalk(this.getMap(),dx,dy)) {
+    if (moveResp.madeAdjacentMove && moveResp.madeAdjacentMove[0]) {
       this.setCameraToAvatar();
+      return true;
     }
+    return false;
   },
   moveCamera: function (dx,dy) {
     this.setCamera(this.attr._cameraX + dx,this.attr._cameraY + dy);
@@ -140,84 +159,91 @@ Game.UIMode.gamePlay = {
     }
   },
   handleKey: function(inputData){
+    var tookTurn = false;
     switch(inputData.key){
+      //tookTurn =
       case Game.getKey("up"):
-      if(this.attr._inSwap){
-        if(this.attr._firstSwap){
-
-        }else{
-
-        }
-
-      }else{
-        //this.moveAvatar(0,-1);
-        this.moveCamera(0, -1);
-      }
+      this.handleDirectional(0, -1);
       break;
       case Game.getKey("left"):
-      if(this.attr._inSwap){
-        if(this.attr._firstSwap){
-
-        }else{
-
-        }
-      }else{
-        //this.moveAvatar(-1,0);
-        this.moveCamera(-1, 0);
-      }
+      this.handleDirectional(-1, 0);
       break;
       case Game.getKey("down"):
-      if(this.attr._inSwap){
-        if(this.attr._firstSwap){
-
-        }else{
-
-        }
-      }else{
-        //this.moveAvatar(0,1);
-        this.moveCamera(0, 1);
-      }
+      this.handleDirectional(0, 1);
       break;
       case Game.getKey('right'):
-      /*
-      if(!this.getMap('second')){
-        this.setMap('second', new Game.Map('basicTunnel'));
-      }else{
-        this.setMap('second');
-      }
-      */
-      if(this.attr._inSwap){
-        if(this.attr._firstSwap){
-
-        }else{
-
-        }
-      }else{
-        //this.moveAvatar(1,0);
-        this.moveCamera(1, 0);
-      }
+      this.handleDirectional(1, 0);
       break;
       case Game.getKey("save_screen"):
       //Game.switchUIMode(Game.UIMode.gameSave);
-      console.dir(this.getMap().getRoom(this.getAvatar().getPos()));
-      this.getMap().getRoom(this.getAvatar().getPos()).swap({x:1, y:1}, {x:2, y:1});
+      //this will potentially be the swap key
+      this.getMap().getRoom(this.getAvatar().getPos()).swap(this.attr._firstSwap_coords, this.attr._secondSwap_coords);
+      this.attr._inSwap = false;
+      this.attr._firstSwap = null;
+      this.attr._firstSwap_coords = null;
+      this.attr._secondSwap_coords = null;
       break;
       case Game.getKey("options"):
       Game.switchUIMode(Game.UIMode.gameOptions);
       break;
     }
+    if (tookTurn) {
+      this.getAvatar().raiseSymbolActiveEvent('actionDone');
+      return true;
+    }
+    return false;
+
     Game.refresh();
+  },
+
+  handleDirectional(dx, dy){
+    if(this.attr._inSwap){
+      var dims = this.getCurrentRoom().getBlockArray();
+      if(this.attr._firstSwap){
+        if(this.attr._secondSwap_coords.x + dx > 0 && this.attr._secondSwap_coords.x + dx <= dims.x &&
+        this.attr._secondSwap_coords.y + dy > 0 && this.attr._secondSwap_coords.y + dy <= dims.y){
+          this.getCurrentRoom.setArray(this.getCurrentRoom().getBlock(this.attr._secondSwap_coords.x, this.attr._secondSwap_coords.y).setColor(Game.UIMode.DEFAULT_COLOR_BG));
+          this.attr._secondSwap_coords = {x: this.attr._secondSwap_coords.x + dx, y: this.attr._secondSwap_coords.y + dy};
+          this.getCurrentRoom.setArray(this.getCurrentRoom().getBlock(this.attr._secondSwap_coords.x, this.attr._secondSwap_coords.y).setColor(Game.UIMode.DEFAULT_COLOR_BG));
+        }else{
+          console.log("can't shift there");
+        }
+      }else{
+        if(this.attr._firstSwap_coords.x + dx > 0 && this.attr._firstSwap_coords.x + dx <= dims.x &&
+        this.attr._firstSwap_coords.y + dy > 0 && this.attr._firstSwap_coords.y + dy <= dims.y){
+          this.attr._firstSwap_coords = {x: this.attr._firstSwap_coords.x + dx, y: this.attr._firstSwap_coords.y + dy};
+        }else{
+          console.log("can't shift there");
+        }
+      }
+
+    }else{
+      this.moveAvatar(dx,dy);
+      //this.moveCamera(0, -1);
+    }
   },
 
   setupNewGame: function () {
     this.setMap('first', new Game.Map('rooms'));
-    console.log("this works");
-    console.dir(this.getMap());
 
     this.setAvatar(Game.EntityGenerator.create('avatar'));
 
     this.getMap().addEntity(this.getAvatar(),this.getMap().getRandomWalkableLocation());
     this.setCameraToAvatar();
+
+    ////////////////////////////////////////////////////
+    // dev code - just add some entities to the map
+    var itemPos = '';
+    for (var ecount = 0; ecount < 4; ecount++) {
+      this.getMap().addEntity(Game.EntityGenerator.create('moss'),this.getMap().getRandomWalkableLocation());
+      this.getMap().addEntity(Game.EntityGenerator.create('newt'),this.getMap().getRandomWalkableLocation());
+      this.getMap().addEntity(Game.EntityGenerator.create('angry squirrel'),this.getMap().getRandomWalkableLocation());
+      this.getMap().addEntity(Game.EntityGenerator.create('attack slug'),this.getMap().getRandomWalkableLocation());
+
+      itemPos = this.getMap().getRandomWalkableLocation();
+      this.getMap().addItem(Game.ItemGenerator.create('rock'),itemPos);
+    }
+    this.getMap().addItem(Game.ItemGenerator.create('rock'),itemPos);
     /*
     // dev code - just add some entities to the map
     for (var ecount = 0; ecount < 80; ecount++) {
@@ -237,6 +263,7 @@ Game.UIMode.gamePlay = {
 
 Game.UIMode.gameWin = {
     enter: function(){
+      Game.TimeEngine.lock();
     },
     exit: function(){
     },
@@ -249,6 +276,7 @@ Game.UIMode.gameWin = {
 
 Game.UIMode.gameLose = {
     enter: function(){
+      Game.TimeEngine.lock();
       console.log("entered lose mode");
       Game.Message.clear();
       Game.refresh();
@@ -302,6 +330,15 @@ Game.UIMode.gameSave = {
     if (this.localStorageAvailable()) {
       Game.DATASTORE.GAME_PLAY = Game.UIMode.gamePlay.attr;
       Game.DATASTORE.MESSAGES = Game.Message.attr;
+
+      Game.DATASTORE.SCHEDULE = {};
+      // NOTE: offsetting times by 1 so later restore can just drop them in and go
+      Game.DATASTORE.SCHEDULE[Game.Scheduler._current.getId()] = 1;
+      for (var i = 0; i < Game.Scheduler._queue._eventTimes.length; i++) {
+        Game.DATASTORE.SCHEDULE[Game.Scheduler._queue._events[i].getId()] = Game.Scheduler._queue._eventTimes[i] + 1;
+      }
+      Game.DATASTORE.SCHEDULE_TIME = Game.Scheduler._queue.getTime() - 1; // offset by 1 so that when the engine is started after restore the queue state will match that as when it was saved
+
       window.localStorage.setItem(Game._PERSISTANCE_NAMESPACE, JSON.stringify(Game.DATASTORE));
       Game.switchUIMode(Game.UIMode.gamePlay);
     }
@@ -312,6 +349,7 @@ Game.UIMode.gameSave = {
       var json_state_data = window.localStorage.getItem(Game._PERSISTANCE_NAMESPACE);
       var state_data = JSON.parse(json_state_data);
 
+      this._resetGameDataStructures();
 //new stuff to inspect
       // game level stuff
       Game.setRandomSeed(state_data[this.RANDOM_SEED_KEY]);
@@ -320,34 +358,69 @@ Game.UIMode.gameSave = {
       for (var mapId in state_data.MAP) {
         if (state_data.MAP.hasOwnProperty(mapId)) {
           var mapAttr = JSON.parse(state_data.MAP[mapId]);
-          Game.DATASTORE.MAP[mapId] = new Game.Map(mapAttr._mapTileSetName);
+          Game.DATASTORE.MAP[mapId] = new Game.Map(mapAttr._mapTileSetName,mapId);
           Game.DATASTORE.MAP[mapId].fromJSON(state_data.MAP[mapId]);
         }
       }
+
+      ROT.RNG.getUniform(); // once the map is regenerated cycle the RNG so we're getting new data for entity generation
 
       // entities
       for (var entityId in state_data.ENTITY) {
         if (state_data.ENTITY.hasOwnProperty(entityId)) {
           var entAttr = JSON.parse(state_data.ENTITY[entityId]);
-          Game.DATASTORE.ENTITY[entityId] = Game.EntityGenerator.create(entAttr._generator_template_key);
+          var newE = Game.EntityGenerator.create(entAttr._generator_template_key,entAttr._id);
+          Game.DATASTORE.ENTITY[entityId] = newE;
           Game.DATASTORE.ENTITY[entityId].fromJSON(state_data.ENTITY[entityId]);
         }
       }
 
-      // game play
-      Game.UIMode.gamePlay.attr = state_data.GAME_PLAY;
+      // items
+      for (var itemId in state_data.ITEM) {
+        if (state_data.ITEM.hasOwnProperty(itemId)) {
+          var itemAttr = JSON.parse(state_data.ITEM[itemId]);
+          var newI = Game.ItemGenerator.create(itemAttr._generator_template_key,itemAttr._id);
+          Game.DATASTORE.ITEM[itemId] = newI;
+          Game.DATASTORE.ITEM[itemId].fromJSON(state_data.ITEM[itemId]);
+        }
+      }
 
-      //messages
+      // game play et al
+      Game.UIMode.gamePlay.attr = state_data.GAME_PLAY;
       Game.Message.attr = state_data.MESSAGES;
+
+      //deal with key bindings later
+
+      // schedule
+      // NOTE: we need to initialize the timing engine a second time because as entities were restored above any active ones scheduled themselves automatically based on their base duration
+      Game.initializeTimingEngine();
+      for (var schedItemId in state_data.SCHEDULE) {
+        if (state_data.SCHEDULE.hasOwnProperty(schedItemId)) {
+          // check here to determine which data store thing will be added to the scheduler (and the actual addition may vary - e.g. not everyting will be a repeatable thing)
+          if (Game.DATASTORE.ENTITY.hasOwnProperty(schedItemId)) {
+            Game.Scheduler.add(Game.DATASTORE.ENTITY[schedItemId],true,state_data.SCHEDULE[schedItemId]);
+          }
+        }
+      }
+      Game.Scheduler._queue._time = state_data.SCHEDULE_TIME;
 
       Game.switchUIMode(Game.UIMode.gamePlay);
     }
   },
 
   newGame: function (){
+    this._resetGameDataStructures();
+    Game.initializeTimingEngine();
     Game.setRandomSeed(5 + Math.floor(Game.TRANSIENT_RNG.getUniform()*100000));
     Game.UIMode.gamePlay.setupNewGame();
     Game.switchUIMode(Game.UIMode.gamePlay);
+  },
+  _resetGameDataStructures: function () {
+    Game.DATASTORE = {};
+    Game.DATASTORE.MAP = {};
+    Game.DATASTORE.ENTITY = {};
+    Game.DATASTORE.ITEM = {};
+    Game.initializeTimingEngine();
   },
 
   BASE_toJSON: function(state_hash_name) {
