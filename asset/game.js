@@ -32,7 +32,7 @@ window.onload = function(){
 var Game = {
   _PERSISTANCE_NAMESPACE: 'wsrlgame',
   _randomSeed: 0,
-  _DISPLAY_SPACING: 1.1,
+  _DISPLAY_SPACING: 1.4,
   _curUIMode: null,
   game: null,
   TRANSIENT_RNG: null,

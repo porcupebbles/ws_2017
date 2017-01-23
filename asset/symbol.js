@@ -4,6 +4,14 @@ Game.Symbol = function (properties) {
   this.attr._char = properties.chr || ' ';
   this.attr._fg = properties.fg || Game.UIMode.DEFAULT_COLOR_FG;
   this.attr._bg = properties.bg || Game.UIMode.DEFAULT_COLOR_BG;
+  this.attr._Swappable = properties.swappable || true; //means the block this symbol is on will not swap
+};
+
+Game.Symbol.prototype.isSwappable = function(){
+  return this.attr._Swappable;
+};
+Game.Symbol.prototype.setSwappable = function(state){
+  this.attr._Swappable = state;
 };
 
 Game.Symbol.prototype.getChar = function () {

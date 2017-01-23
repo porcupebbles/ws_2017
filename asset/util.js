@@ -7,6 +7,15 @@ if (!String.prototype.startsWith) { // nabbed from https://developer.mozilla.org
 
 Game.util = {
 
+  divisors: function(number){
+    var divs = [];
+    for(var i = 2; i < 10; i++){
+      if(number % i == 0){
+        divs.push(i);
+      }
+    }
+    return divs;
+  },
   randomString: function (len) {
     var charSource = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'.split('');
     var res='';
@@ -42,13 +51,18 @@ Game.util = {
 
   positionsAdjacentTo: function (pos) {
     var adjPos = [];
-    for (var dx = -1; dx <= 1; dx++) {
-      for (var dy = -1; dy <= 1; dy++) {
-        if (dx !== 0 && dy !== 0) {
-          adjPos.push({x:pos.x+dx,y:pos.y+dy});
-        }
-      }
-    }
+    adjPos.push({x: pos.x+1, y: pos.y});
+    adjPos.push({x: pos.x-1, y: pos.y});
+    adjPos.push({x: pos.x, y: pos.y+1});
+    adjPos.push({x: pos.x, y: pos.y-1});
+    // for (var dx = -1; dx <= 1; dx++) {
+    //   for (var dy = -1; dy <= 1; dy++) {
+    //     if (dx !== 0 && dy !== 0) {
+    //       adjPos.push({x:pos.x+dx,y:pos.y+dy});
+    //     }
+    //   }
+    // }
+    //
     return adjPos;
   },
 
@@ -111,7 +125,7 @@ Game.util = {
     var the = Game.util.init2DArray(8, 8, Game.Tile.nullTile);
     for(var i = 0; i < the.length; i++){
       for(var j = 0; j < the[0].length; j++){
-        the[i][j] = new Game.Tile({name: 'roomWall', chr:'#', room: true, fg: '#605db1', transparent: true, walkable: true});
+        the[i][j] = new Game.Tile({name: 'roomWall', chr:'#', room: true, fg: '#605db1', transparent: true});
       }
     }
     return the;

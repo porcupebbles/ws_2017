@@ -9,6 +9,7 @@ Game.UIMode.json_state_data = null;
 Game.UIMode.gameStart = {
   enter: function(){
     Game.refresh();
+    Game.RoomTileSets['mazeRoom'].getRoomInfo();
   },
   exit: function(){
   },
@@ -73,7 +74,7 @@ Game.UIMode.gamePlay = {
     }
   },
   getCurrentRoom: function(){
-    return this.getMap().getRoom(this.getAvatar().getPos());
+    return this.getMap().adjacentToRoom(this.getAvatar().getPos().x, this.getAvatar().getPos().y);
   },
   setMap: function (the_name, map) {
     //maybe set camera to avatar here
@@ -189,8 +190,8 @@ Game.UIMode.gamePlay = {
           this.attr._inSecondSwap = false;
         }else{
           console.log("now in swap");
+          this.getAvatar().setSwappable(false);
           this.attr._inSwap = true;
-
           this.attr._firstSwap_coords = this.getCurrentRoom().getGoodCoordinate();
           this.getCurrentRoom().setFirstSelected(this.attr._firstSwap_coords.x, this.attr._firstSwap_coords.y);
         }
@@ -257,15 +258,14 @@ Game.UIMode.gamePlay = {
 
     this.getMap().addEntity(this.getAvatar(),{x: 12, y: 5});
     this.setCameraToAvatar();
-    this.getMap().addEntity(Game.EntityGenerator.create('newt'), {x:5, y:5});
-    /*
+
     ////////////////////////////////////////////////////
     // dev code - just add some entities to the map
     var itemPos = '';
     for (var ecount = 0; ecount < 4; ecount++) {
-      this.getMap().addEntity(Game.EntityGenerator.create('moss'),this.getMap().getRandomWalkableLocation());
-      this.getMap().addEntity(Game.EntityGenerator.create('newt'),this.getMap().getRandomWalkableLocation());
-      this.getMap().addEntity(Game.EntityGenerator.create('angry squirrel'),this.getMap().getRandomWalkableLocation());
+      // this.getMap().addEntity(Game.EntityGenerator.create('moss'),this.getMap().getRandomWalkableLocation());
+      // this.getMap().addEntity(Game.EntityGenerator.create('newt'),this.getMap().getRandomWalkableLocation());
+      // this.getMap().addEntity(Game.EntityGenerator.create('angry squirrel'),this.getMap().getRandomWalkableLocation());
       this.getMap().addEntity(Game.EntityGenerator.create('attack slug'),this.getMap().getRandomWalkableLocation());
 
       itemPos = this.getMap().getRandomWalkableLocation();

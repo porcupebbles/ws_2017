@@ -158,8 +158,8 @@ Game.Room.prototype.contains = function(pos){
 
 Game.Room.prototype.surrounds = function(pos){
   var thispos = this.getPos();
-  return pos.x >= (thispos.x-1) && pos.x <= (thispos.x + this.getWidth() + 1) &&
-  pos.y >= (thispos.y-1) && pos.y <= (thispos.y + this.getHeight() + 1);
+  return pos.x >= (thispos.x-1) && pos.x <= (thispos.x + this.getWidth()) &&
+  pos.y >= (thispos.y-1) && pos.y <= (thispos.y + this.getHeight());
 };
 
 Game.Room.prototype.randomValidAdjacent = function(){

@@ -4,8 +4,6 @@ Game.SymbolActive = function(template) {
   this.attr._name = template.name || '';
   this.attr._id = template.presetId || Game.util.uniqueId();
 
-  this.attr._Swappable = template.swappable || true; //means the block this symbol is on will not swap
-
   // mixin sutff
   // track mixins and groups, copy over non-META properties, and run the mixin init if it exists
   // NOTE: this._mixinSet is set up / defined by the sub-class (see Entity for example)
@@ -62,12 +60,6 @@ Game.SymbolActive.prototype.getName = function() {
 };
 Game.SymbolActive.prototype.setName = function(name) {
     this.attr._name = name;
-};
-Game.SymbolActive.prototype.isSwappable = function(){
-  return this.attr._Swappable;
-};
-Game.SymbolActive.prototype.setSwappable = function(state){
-  this.attr._Swappable = state;
 };
 
 Game.SymbolActive.prototype.hasMixin = function(checkThis) {

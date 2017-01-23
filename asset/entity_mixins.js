@@ -560,3 +560,111 @@ Game.EntityMixin.WanderChaserActor = {
     Game.TimeEngine.unlock();
   }
 };
+Game.EntityMixin.AlertableChaserActor = {
+  META: {
+    mixinName: 'AlertableChaserActor',
+    mixinGroup: 'Actor',
+    stateNamespace: '_AlertableChaserActor_attr',
+    stateModel:  {
+      baseActionDuration: 1000,
+      currentActionDuration: 1000,
+      Alert_Range: 10,
+      Alerted: false
+    },
+    init: function (template) {
+      Game.Scheduler.add(this,true, Game.util.randomInt(2,this.getBaseActionDuration()));
+      this.attr._AlertableChaserActor_attr.baseActionDuration = template.AlertableChaserActionDuration || 1000;
+      this.attr._AlertableChaserActor_attr.currentActionDuration = this.attr._AlertableChaserActor_attr.baseActionDuration;
+    }
+  },
+  getAlertRange: function(){
+    return this.attr._AlertableChaserActor_attr.Alert_Range;
+  },
+  setAlertRange: function(new_value){
+    this.attr._AlertableChaserActor_attr.Alert_Range = new_value;
+  },
+  getAlerted: function(){
+    return this.attr._AlertableChaserActor_attr.Alerted;
+  },
+  setAlerted: function(new_value){
+    this.attr._AlertableChaserActor_attr.Alerted = new_value;
+  },
+  getBaseActionDuration: function () {
+    return this.attr._AlertableChaserActor_attr.baseActionDuration;
+  },
+  setBaseActionDuration: function (n) {
+    this.attr._AlertableChaserActor_attr.baseActionDuration = n;
+  },
+  getCurrentActionDuration: function () {
+    return this.attr._AlertableChaserActor_attr.currentActionDuration;
+  },
+  setCurrentActionDuration: function (n) {
+    this.attr._AlertableChaserActor_attr.currentActionDuration = n;
+  },
+  getMoveDeltas: function () {
+    var avatar = Game.getAvatar();
+    var senseResp = this.raiseSymbolActiveEvent('senseForEntity',{senseForEntity:avatar});
+    if (Game.util.compactBooleanArray_or(senseResp.entitySensed)) {
+
+      // build a path instance for the avatar
+      var source = this;
+      var map = this.getMap();
+      var path = new ROT.Path.AStar(avatar.getX(), avatar.getY(), function(x, y) {
+          // If an entity is present at the tile, can't move there.
+          var entity = map.getEntity(x, y);
+          if (entity && entity !== avatar && entity !== source) {
+              return false;
+          }
+          return map.getTile(x, y).isWalkable();
+      }, {topology: 8});
+
+      // compute the path from here to there
+      var count = 0;
+      var moveDeltas = {x:0,y:0};
+      path.compute(this.getX(), this.getY(), function(x, y) {
+          if (count == 1) {
+              moveDeltas.x = x - source.getX();
+              moveDeltas.y = y - source.getY();
+          }
+          count++;
+      });
+
+      return moveDeltas;
+    }
+    return Game.util.positionsAdjacentTo({x:0,y:0}).random();
+  },
+  canSeeCoord: function(x_or_pos,y) {
+    var otherX = x_or_pos,otherY=y;
+    if (typeof x_or_pos == 'object') {
+      otherX = x_or_pos.x;
+      otherY = x_or_pos.y;
+    }
+
+    // If we're not within the sight radius, then we won't be in a real field of view either.
+    if (Math.max(Math.abs(otherX - this.getX()),Math.abs(otherY - this.getY())) > this.attr._AlertableChaserActor_attr.Alert_Range) {
+      return false;
+    }
+
+    var inFov = this.getVisibleCells();
+    return inFov[otherX+','+otherY] || false;
+  },
+  act: function () {
+    Game.TimeEngine.lock();
+    // console.log("begin wander acting");
+    // console.log('wander for '+this.getName());
+    var avatar = Game.getAvatar();
+    if(!this.getAlerted() && this.canSeeCoord(avatar.getPos())){
+      this.setAlerted(true);
+    }
+
+    if(this.getAlerted()){
+      var moveDeltas = this.getMoveDeltas();
+      this.raiseSymbolActiveEvent('adjacentMove',{dx:moveDeltas.x,dy:moveDeltas.y});
+    }
+    Game.Scheduler.setDuration(this.getCurrentActionDuration());
+    this.setCurrentActionDuration(this.getBaseActionDuration()+Game.util.randomInt(-10,10));
+    this.raiseSymbolActiveEvent('actionDone');
+    // console.log("end wander acting");
+    Game.TimeEngine.unlock();
+  }
+};

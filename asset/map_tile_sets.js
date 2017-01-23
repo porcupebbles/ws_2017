@@ -41,7 +41,6 @@ Game.MapTileSets = {
         }
       });
 
-console.dir({rooms: [], tiles: mapTiles});
       return {rooms: [], tiles: mapTiles}; //should also pass info about room location and
                                 //block size
           //rooms will be an array of objects constaining the upperleft coordinate,
@@ -127,19 +126,21 @@ console.dir({rooms: [], tiles: mapTiles});
   },
 
   rooms: {
-    _width: 100,
-    _height: 20,
+    _width: 1000,
+    _height: 500,
     getMapInfo: function(){
       var mapTiles = Game.util.init2DArray(this._width, this._height, Game.Tile.wallTile);
 
       var all_rooms = [];
 
-      var room_name = 'diagonalRoom';
+      var room_name = 'mazeRoom';
       var x_pos = 0;
       console.log("got here at least");
       for(var i = 0; i < 5; i++){
         //console.log(i, ".", 1)
+
         var room = new Game.Room(room_name, {x:x_pos, y:0});
+
         //console.dir(room);
         //console.log(i, ".", 2)
         all_rooms.push(room);

@@ -300,6 +300,14 @@ Game.Map.prototype.renderFovOn = function (display,camX,camY,radius) {
   return inFov;
 };
 
+Game.Map.prototype.adjacentToRoom = function(px, py){
+  for(var i = 0; i < this.attr._rooms.length; i++){
+    if(this.attr._rooms[i].surrounds({x:px, y:py})){
+      return this.attr._rooms[i];
+    }
+  }
+};
+
 Game.Map.prototype.setArray = function(featureArray, x, y){
   for(var i = 0; i < featureArray.length; i++){
     for(var j = 0; j < featureArray[0].length; j++){
