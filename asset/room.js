@@ -9,10 +9,8 @@ Game.Room = function(roomTileSetName, pos, map){
     _width: info.width,
     _height: info.height,
     _first_selected: null,
-    _second_selected: null,
-    _entitiesByLocation: {},
-    _locationsByEntity: {},
-    _itemsByLocation: {}
+    _second_selected: null
+
   }
   this.attr._block_x = this.attr._width/this.attr._block_dim.width;
   this.attr._block_y = this.attr._height/this.attr._block_dim.height;
@@ -21,32 +19,55 @@ Game.Room = function(roomTileSetName, pos, map){
 
 //x and y must fall in the range
 Game.Room.prototype.setFirstSelected = function(px, py){
-  if(px>0 || px<=this.attr._block_x || py> 0 || py<=this.attr._block_y){
-    console.dir(JSON.parse(JSON.stringify(this.getTiles())));
+  if(px<=0 || px>this.attr._block_x || py<= 0 || py>this.attr._block_y || this.containsSwappable(px, py)){
+    console.log("selected block not in range");
+    return false;
+  }else{
     if(this.attr._first_selected){
-      Game.util.setColor(this.getBlock(this.attr._first_selected.x, this.attr._first_selected.y), Game.UIMode.DEFAULT_COLOR_BG);
+      var info = this.getBlock(this.attr._first_selected.x, this.attr._first_selected.y);
+      for(var i = 0; i<this.attr._block_dim.width; i++){
+        for(var j = 0; j<this.attr._block_dim.height; j++){
+          this.setTileBg(i+info.pos.x,j+info.pos.y, Game.UIMode.DEFAULT_COLOR_BG);
+        }
+      }
     }
 
-    Game.util.setColor(this.getBlock(px, py), '#222');
+    var info = this.getBlock(px, py);
+    for(var i = 0; i<this.attr._block_dim.width; i++){
+      for(var j = 0; j<this.attr._block_dim.height; j++){
+        this.setTileBg(i+info.pos.x, j+info.pos.y, '#9966ff');
+      }
+    }
     this.attr._first_selected = {x: px, y:py};
-    console.dir(JSON.parse(JSON.stringify(this.getTiles())));
+
     return true;
   }
-  console.log("selected block not in range");
-  return false;
 };
 
 Game.Room.prototype.setSecondSelected = function(px, py){
-  if(px>0 || px<=this.attr._block_x || py> 0 || py<=this.attr._block_y){
+  if(px<=0 || px>this.attr._block_x || py<= 0 || py>this.attr._block_y || (px==this.attr._first_selected.x && py==this.attr._first_selected.y)|| this.containsSwappable(px, py)){
+    console.log("selected block not in range");
+    return false;
+  }else{
     if(this.attr._second_selected){
-      Game.util.setColor(this.getBlock(this.attr._second_selected.x, this.attr._second_selected.y), Game.UIMode.DEFAULT_COLOR_BG);
+      var info = this.getBlock(this.attr._second_selected.x, this.attr._second_selected.y);
+      for(var i = 0; i<this.attr._block_dim.width; i++){
+        for(var j = 0; j<this.attr._block_dim.height; j++){
+          this.setTileBg(i+info.pos.x,j+info.pos.y, Game.UIMode.DEFAULT_COLOR_BG);
+        }
+      }
     }
 
-    Game.util.setColor(this.getBlock(px, py), '#333');
-    this.attr._second_selected = {x: px, y: py}
+    var info = this.getBlock(px, py);
+    for(var i = 0; i<this.attr._block_dim.width; i++){
+      for(var j = 0; j<this.attr._block_dim.height; j++){
+        this.setTileBg(i+info.pos.x, j+info.pos.y, '#ff66cc');
+      }
+    }
+    this.attr._second_selected = {x: px, y:py};
+
     return true;
   }
-  return false;
 };
 
 Game.Room.prototype.getFirstSelected = function(){
@@ -58,7 +79,12 @@ Game.Room.prototype.getSecondSelected = function(){
 };
 
 Game.Room.prototype.clearSelected = function(){
-  Game.util.setColor(this.getTiles(), Game.UIMode.DEFAULT_COLOR_BG);
+  var map = this.getMap();
+  for(var i = 0; i<this.getWidth();i++){
+    for(var j = 0; j<this.getHeight();j++){
+      this.setTileBg(i, j, Game.UIMode.DEFAULT_COLOR_BG);
+    }
+  }
 
   this.attr._first_selected = null;
   this.attr._second_selected = null;
@@ -108,6 +134,22 @@ Game.Room.prototype.getBlock = function(x, y){
   return {tiles: theGrid, pos: {x: start_x, y: start_y}};
 };
 
+Game.Room.prototype.containsSwappable = function(x, y){
+  var info = this.getBlock(x, y);
+  var map = this.getMap();
+  for(var i = 0; i < this.attr._block_dim.width; i++){
+    for(var j = 0; j < this.attr._block_dim.height; j++){
+      var ent = map.getEntity(info.pos.x+i+this.getPos().x, info.pos.y+j+this.getPos().y);
+      if( ent && !ent.isSwappable()){
+        return true;
+
+      }
+      //handle items as necessary
+    }
+  }
+  return false;
+};
+
 Game.Room.prototype.contains = function(pos){
   var thispos = this.getPos();
   return pos.x >= thispos.x && pos.x < thispos.x + this.getWidth() &&
@@ -148,12 +190,89 @@ Game.Room.prototype.swap = function(entry1, entry2){
 
 
   //handle entities here
+  var cy1 = (entry1.y - 1)*this.attr._block_dim.height + this.getPos().y;
+  var cx1 = (entry1.x - 1)*this.attr._block_dim.width + this.getPos().x;
+  var cy2 = (entry2.y - 1)*this.attr._block_dim.height + this.getPos().y;
+  var cx2 = (entry2.x - 1)*this.attr._block_dim.width + this.getPos().x;
 
+  Game.toReplace = {};
+
+  var map = this.getMap();
+  for(var i=0; i<this.attr._block_dim.width; i++){
+    for(var j=0; j<this.attr._block_dim.height; j++){
+      var ent1 = map.extractEntityAt({x:cx1 + i, y:cy1 + j});
+      var item1 = map.extractItemAt({x:cx1 + i, y:cy1 + j});
+      if(ent1){
+        console.log("placed entity into toReplace");
+        ent1.setBg(Game.UIMode.DEFAULT_COLOR_BG);
+        Game.toReplace[ent1.getId()] = {entity: ent1, pos: {x:cx2 + i, y:cy2 + j}};
+      }
+      if(item1){
+        item1.setBg(Game.UIMode.DEFAULT_COLOR_BG);
+        Game.toReplace[item1.getId()] = {item: item1, pos: {x:cx2 + i, y:cy2 + j}};
+      }
+      var ent2 = map.extractEntityAt({x:cx2 + i, y:cy2 + j});
+      var item2 = map.extractItemAt({x:cx2 + i, y:cy2 + j});
+      if(ent2){
+        ent2.setBg(Game.UIMode.DEFAULT_COLOR_BG);
+        Game.toReplace[ent2.getId()] = {entity: ent2, pos: {x:cx1 + i, y:cy1 + j}};
+      }
+      if(item2){
+        item2.setBg(Game.UIMode.DEFAULT_COLOR_BG);
+        Game.toReplace[item2.getId()] = {item: item2, pos: {x:cx1 + i, y:cy1 + j}};
+      }
+      //handle items here too
+    }
+  }
+
+  for(var id in Game.toReplace){
+    var thing_pos = Game.toReplace[id];
+    if(thing_pos.hasOwnProperty('entity')){
+      map.addEntity(thing_pos.entity, thing_pos.pos);
+    }else if(thing_pos.hasOwnProperty('item')){
+      map.addItem(thing_pos.item, thing_pos.pos);
+    }
+  }
+
+
+
+  //bugged
   this.clearSelected();
+
   this.getMap().setUpFov();
 };
 
+Game.Room.prototype.setTileBg = function(x, y, color){
+  this.getTiles()[x][y].setBg(color);
+  this.getMap().getTiles()[x+this.getPos().x][y+this.getPos().y].setBg(color);
+  var ent = this.getMap().getEntity(x+this.getPos().x, y+this.getPos().y);
+  if(ent){
+    ent.setBg(color);
+  }
+  var items = this.getMap().getItems(x+this.getPos().x, y+this.getPos().y);
+  for(var i = 0; i<items.length;i++){
+    items[i].setBg(color);
+  }
+};
 
+Game.Room.prototype.getGoodCoordinate = function(){
+  for(var i = 1; i<=this.attr._block_x; i++){
+    for( var j = 1; j<=this.attr._block_y; j++){
+        if(!this.containsSwappable(i, j) && !this.coordsUsed(i, j)){
+          return {x:i, y:j};
+        }
+    }
+  }
+  return null;
+};
+
+Game.Room.prototype.coordsUsed = function(x, y){
+  if(this.attr._first_selected){
+    return this.attr._first_selected.x == x && this.attr._first_selected.y == y;
+  }else{
+    return false;
+  }
+};
 
 Game.Room.prototype.getRandomLocation = function(filter_func){
   if (filter_func === undefined) {
@@ -175,101 +294,12 @@ Game.Room.prototype.getRandomWalkableLocation = function (entity) {
 Game.Room.prototype.setArray = function(featureArray, x, y){
   for(var i = 0; i < featureArray.length; i++){
     for(var j = 0; j < featureArray[0].length; j++){
-      console.dir(featureArray[i][j]);
       this.attr._tiles[x+i][y+j] = featureArray[i][j];
       if(this.getMap()){
         this.getMap().getTiles()[x+i+this.getPos().x][y+j+this.getPos().y] = featureArray[i][j];
       }
     }
   }
-};
-Game.Map.prototype.addEntity = function (ent,pos) {
-  this.getMap().addEntity(ent, )
-};
-
-Game.Map.prototype.addItem = function (itm,pos) {
-    var loc = pos.x+","+pos.y;
-    if (! this.attr._itemsByLocation[loc]) {
-      this.attr._itemsByLocation[loc] = [];
-    }
-    this.attr._itemsByLocation[loc].push(itm.getId());
-};
-
-Game.Room.prototype.updateEntityLocation = function (ent) {
-  this.getMap().updateEntityLocation(ent);
-  //console.log('updating position of '+ent.getName()+' ('+ent.getId()+')');
-  var origLoc = this.attr._locationsByEntity[ent.getId()];
-  if (origLoc) {
-    this.attr._entitiesByLocation[origLoc] = undefined;
-  }
-  var pos = ent.getPos();
-  this.attr._entitiesByLocation[pos.x+","+pos.y] = ent.getId();
-  this.attr._locationsByEntity[ent.getId()] = pos.x+","+pos.y;
-};
-
-Game.Map.prototype.getEntity = function (x_or_pos,y) {
-  var useX = x_or_pos,useY=y;
-  if (typeof x_or_pos == 'object') {
-    useX = x_or_pos.x;
-    useY = x_or_pos.y;
-  }
-  var entId = this.attr._entitiesByLocation[useX+','+useY];
-  if (entId) { return Game.DATASTORE.ENTITY[entId]; }
-  return  false;
-};
-
-Game.Map.prototype.getItems = function (x_or_pos,y) {
-  var useX = x_or_pos,useY=y;
-  if (typeof x_or_pos == 'object') {
-    useX = x_or_pos.x;
-    useY = x_or_pos.y;
-  }
-  var itemIds = this.attr._itemsByLocation[useX+','+useY];
-  if (itemIds) { return itemIds.map(function(iid) { return Game.DATASTORE.ITEM[iid]; }); }
-  return  [];
-};
-
-Game.Room.prototype.extractEntity = function (ent) {
-  this.attr._entitiesByLocation[ent.getX()+","+ent.getY()] = undefined;
-  this.attr._locationsByEntity[ent.getId()] = undefined;
-  this.getMap().extractEntity(ent);
-  return ent;
-};
-
-Game.Room.prototype.extractEntityAt = function (x_or_pos,y) {
-  var ent = this.getEntity(x_or_pos,y);
-  if (ent) {
-    this.attr._entitiesByLocation[ent.getX()+","+ent.getY()] = undefined;
-    this.attr._locationsByEntity[ent.getId()] = undefined;
-    this.getMap().extractEntityAt(x_or_pos, y);
-  }
-  return ent;
-};
-
-Game.Map.prototype.extractItemAt = function (itm_or_idx,x_or_pos,y) {
-  var useX = x_or_pos,useY=y;
-  if (typeof x_or_pos == 'object') {
-    useX = x_or_pos.x;
-    useY = x_or_pos.y;
-  }
-  var itemIds = this.attr._itemsByLocation[useX+','+useY];
-  if (! itemIds) { return false; }
-
-  var item = false, extractedId = '';
-  if (Number.isInteger(itm_or_idx)) {
-    extractedId = itemIds.splice(itm_or_idx,1);
-    item = Game.DATASTORE.ITEM[extractedId];
-  } else {
-    var idToFind = itm_or_idx.getId();
-    for (var i = 0; i < itemIds.length; i++) {
-      if (idToFind === itemIds[i]) {
-        extractedId = itemIds.splice(i,1);
-        item = Game.DATASTORE.ITEM[extractedId];
-        break;
-      }
-    }
-  }
-  return item;
 };
 
 Game.Map.prototype.toJSON = function () {

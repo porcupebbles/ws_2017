@@ -176,43 +176,51 @@ Game.UIMode.gamePlay = {
       tookTurn = this.handleDirectional(1, 0);
       break;
       case Game.getKey("save_screen"):
-      //Game.switchUIMode(Game.UIMode.gameSave);
-      //this will potentially be the swap key
-      if(this.attr._inSwap){
-        this.attr._inSwap = false;
-        this.getCurrentRoom().clearSelected();
-        this.attr._inSecondSwap = false;
-      }else{
-        console.log("now in swap");
-        this.attr._inSwap = true;
-
-        //improve on this
-        this.attr._firstSwap_coords = {x:1, y:1};
-        this.getCurrentRoom().setFirstSelected(this.attr._firstSwap_coords.x, this.attr._firstSwap_coords.y);
-      }
+      Game.switchUIMode(Game.UIMode.gameSave);
       break;
       case Game.getKey("options"):
-      //Game.switchUIMode(Game.UIMode.gameOptions);
+      Game.switchUIMode(Game.UIMode.gameOptions);
+      break;
+      case Game.getKey("swap"):
+      if(this.getCurrentRoom()){
+        if(this.attr._inSwap){
+          this.attr._inSwap = false;
+          this.getCurrentRoom().clearSelected();
+          this.attr._inSecondSwap = false;
+        }else{
+          console.log("now in swap");
+          this.attr._inSwap = true;
+
+          this.attr._firstSwap_coords = this.getCurrentRoom().getGoodCoordinate();
+          this.getCurrentRoom().setFirstSelected(this.attr._firstSwap_coords.x, this.attr._firstSwap_coords.y);
+        }
+      }else{
+        Game.Message.send("not in a room, cannot swap");
+      }
+      break;
+      case Game.getKey("swap_confirm"):
       if(this.attr._inSwap){
         if(this.attr._inSecondSwap){
           this.getCurrentRoom().swap(this.attr._firstSwap_coords, this.attr._secondSwap_coords);
           this.attr._inSwap = false;
           this.attr._inSecondSwap = false;
-          tookTurn = true;
+          //tookTurn = true;
         }else{
           this.attr._inSecondSwap = true;
 
           //improve on this
-          this.attr._secondSwap_coords = {x: 1, y: 2};
+          this.attr._secondSwap_coords = this.getCurrentRoom().getGoodCoordinate();
+          console.dir(this.attr._secondSwap_coords);
+
+          ///bugged
           this.getCurrentRoom().setSecondSelected(this.attr._secondSwap_coords.x, this.attr._secondSwap_coords.y);
         }
       }else{
-        console.log("swap not started");
+        console.log("not in swap. Cannot confirm");
       }
       break;
     }
 
-    console.dir(this.getMap().getTile(5, 5));
     Game.refresh();
 
     if (tookTurn) {
@@ -223,20 +231,15 @@ Game.UIMode.gamePlay = {
   },
 
   handleDirectional(dx, dy){
-    console.log("handling directional input");
+    console.log("avatar");
+    console.dir(this.getAvatar());
     if(this.attr._inSwap){
-      console.log("moving in swap")
-      var dims = this.getCurrentRoom().getBlockArray();
-      if(this.attr_inSecondSwap){
-        console.log("moving second swap coords");
-        if(this.getCurrentRoom().setSecondSelected(this.attr._secondSwap_coords.x, this.attr._secondSwap_coords.y)){
-          console.log("updating second swap coords");
+      if(this.attr._inSecondSwap){
+        if(this.getCurrentRoom().setSecondSelected(this.attr._secondSwap_coords.x + dx, this.attr._secondSwap_coords.y + dy)){
           this.attr._secondSwap_coords = {x:this.attr._secondSwap_coords.x + dx, y: this.attr._secondSwap_coords.y +dy };
         }
       }else{
-        console.log("moving first swap coords");
-        if(this.getCurrentRoom().setFirstSelected(this.attr._firstSwap_coords.x, this.attr._firstSwap_coords.y)){
-          console.log("updating first swap coords");
+        if(this.getCurrentRoom().setFirstSelected(this.attr._firstSwap_coords.x + dx, this.attr._firstSwap_coords.y + dy)){
           this.attr._firstSwap_coords = {x:this.attr._firstSwap_coords.x + dx, y: this.attr._firstSwap_coords.y +dy };
         }
       }
@@ -252,9 +255,10 @@ Game.UIMode.gamePlay = {
 
     this.setAvatar(Game.EntityGenerator.create('avatar'));
 
-    this.getMap().addEntity(this.getAvatar(),this.getMap().getRandomWalkableLocation());
+    this.getMap().addEntity(this.getAvatar(),{x: 12, y: 5});
     this.setCameraToAvatar();
-
+    this.getMap().addEntity(Game.EntityGenerator.create('newt'), {x:5, y:5});
+    /*
     ////////////////////////////////////////////////////
     // dev code - just add some entities to the map
     var itemPos = '';
