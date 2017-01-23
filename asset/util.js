@@ -101,8 +101,17 @@ Game.util = {
   setColor: function(array, color){
     for(var i = 0; i<array.length; i++){
       for(var j = 0; j<array.length[0].length; j++){
-        array[i][j] = array[i][j].setBg(color);
+        array[i][j].setBg(color);
       }
     }
+  },
+  thefunc: function(){
+    var the = Game.util.init2DArray(8, 8, Game.Tile.nullTile);
+    for(var i = 0; i < the.length; i++){
+      for(var j = 0; j < the[0].length; j++){
+        the[i][j] = new Game.Tile({name: 'roomWall', chr:'#', room: true, fg: '#605db1', transparent: true, walkable: true});
+      }
+    }
+    return the;
   }
 };

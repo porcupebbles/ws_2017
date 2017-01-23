@@ -1,8 +1,8 @@
 Game.RoomTileSets = {
 
     blockTemplates: {
-      one: Game.util.init2DArray(4, 4, Game.Tile.wallTile),
-      two: Game.util.init2DArray(8, 8, Game.Tile.roomWall)
+      one: Game.util.thefunc(),
+      two: Game.util.thefunc()
     },
 
     basicRoom: {
@@ -25,8 +25,12 @@ Game.RoomTileSets = {
 
         roomTiles = Game.MapTileSets.setFeature(roomTiles, Game.RoomTileSets.blockTemplates.two, {x:0, y:0});
         roomTiles = Game.MapTileSets.setFeature(roomTiles, Game.RoomTileSets.blockTemplates.two, {x:8, y:8});
+          roomTiles = Game.MapTileSets.setFeature(roomTiles, Game.RoomTileSets.blockTemplates.two, {x:0, y:8});
+            roomTiles = Game.MapTileSets.setFeature(roomTiles, Game.RoomTileSets.blockTemplates.two, {x:8, y:0});
 
         return {block_dim: blocdim, tiles: roomTiles, width: this._width, height: this._height};
       }
     }
+
+
 }

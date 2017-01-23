@@ -11,7 +11,8 @@ Game.Map = function (mapTileSetName, presetId) {
     _entitiesByLocation: {},
     _locationsByEntity: {},
     _rooms: info.rooms || null,
-    _itemsByLocation: {}
+    _itemsByLocation: {},
+    _inRoom: info.inRoom || false
   };
 
   for(var i = 0; i < this.attr._rooms.length; i++){
@@ -22,6 +23,18 @@ Game.Map = function (mapTileSetName, presetId) {
   this.setUpFov();
 
   Game.DATASTORE.MAP[this.attr._id] = this;
+};
+
+Game.Map.prototype.getTiles = function(){
+  return this._tiles;
+};
+
+Game.Map.prototype.getInRoom = function(){
+  return this.attr._inRoom;
+};
+
+Game.Map.prototype.setInRoom = function(state){
+  this.attr._inRoom = state;
 };
 
 Game.Map.prototype.setUpFov = function () {

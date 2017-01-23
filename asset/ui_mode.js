@@ -38,7 +38,7 @@ Game.UIMode.gamePlay = {
     _cameraY: 5,
     _avatarId: null,
     _inSwap: false,
-    _firstSwap: null,
+    _inSecondSwap: false,
 
     //these are questionable
     _firstSwap_coords: null,
@@ -154,8 +154,9 @@ Game.UIMode.gamePlay = {
         case 'Backspace': handle = true; break;
       }
       if(handle){
-        this.handleKey(inputData);
+        return this.handleKey(inputData);
       }
+      return false;
     }
   },
   handleKey: function(inputData){
@@ -163,63 +164,86 @@ Game.UIMode.gamePlay = {
     switch(inputData.key){
       //tookTurn =
       case Game.getKey("up"):
-      this.handleDirectional(0, -1);
+      tookTurn = this.handleDirectional(0, -1);
       break;
       case Game.getKey("left"):
-      this.handleDirectional(-1, 0);
+      tookTurn = this.handleDirectional(-1, 0);
       break;
       case Game.getKey("down"):
-      this.handleDirectional(0, 1);
+      tookTurn = this.handleDirectional(0, 1);
       break;
       case Game.getKey('right'):
-      this.handleDirectional(1, 0);
+      tookTurn = this.handleDirectional(1, 0);
       break;
       case Game.getKey("save_screen"):
       //Game.switchUIMode(Game.UIMode.gameSave);
       //this will potentially be the swap key
-      this.getMap().getRoom(this.getAvatar().getPos()).swap(this.attr._firstSwap_coords, this.attr._secondSwap_coords);
-      this.attr._inSwap = false;
-      this.attr._firstSwap = null;
-      this.attr._firstSwap_coords = null;
-      this.attr._secondSwap_coords = null;
+      if(this.attr._inSwap){
+        this.attr._inSwap = false;
+        this.getCurrentRoom().clearSelected();
+        this.attr._inSecondSwap = false;
+      }else{
+        console.log("now in swap");
+        this.attr._inSwap = true;
+
+        //improve on this
+        this.attr._firstSwap_coords = {x:1, y:1};
+        this.getCurrentRoom().setFirstSelected(this.attr._firstSwap_coords.x, this.attr._firstSwap_coords.y);
+      }
       break;
       case Game.getKey("options"):
-      Game.switchUIMode(Game.UIMode.gameOptions);
+      //Game.switchUIMode(Game.UIMode.gameOptions);
+      if(this.attr._inSwap){
+        if(this.attr._inSecondSwap){
+          this.getCurrentRoom().swap(this.attr._firstSwap_coords, this.attr._secondSwap_coords);
+          this.attr._inSwap = false;
+          this.attr._inSecondSwap = false;
+          tookTurn = true;
+        }else{
+          this.attr._inSecondSwap = true;
+
+          //improve on this
+          this.attr._secondSwap_coords = {x: 1, y: 2};
+          this.getCurrentRoom().setSecondSelected(this.attr._secondSwap_coords.x, this.attr._secondSwap_coords.y);
+        }
+      }else{
+        console.log("swap not started");
+      }
       break;
     }
+
+    console.dir(this.getMap().getTile(5, 5));
+    Game.refresh();
+
     if (tookTurn) {
       this.getAvatar().raiseSymbolActiveEvent('actionDone');
       return true;
     }
     return false;
-
-    Game.refresh();
   },
 
   handleDirectional(dx, dy){
+    console.log("handling directional input");
     if(this.attr._inSwap){
+      console.log("moving in swap")
       var dims = this.getCurrentRoom().getBlockArray();
-      if(this.attr._firstSwap){
-        if(this.attr._secondSwap_coords.x + dx > 0 && this.attr._secondSwap_coords.x + dx <= dims.x &&
-        this.attr._secondSwap_coords.y + dy > 0 && this.attr._secondSwap_coords.y + dy <= dims.y){
-          this.getCurrentRoom.setArray(this.getCurrentRoom().getBlock(this.attr._secondSwap_coords.x, this.attr._secondSwap_coords.y).setColor(Game.UIMode.DEFAULT_COLOR_BG));
-          this.attr._secondSwap_coords = {x: this.attr._secondSwap_coords.x + dx, y: this.attr._secondSwap_coords.y + dy};
-          this.getCurrentRoom.setArray(this.getCurrentRoom().getBlock(this.attr._secondSwap_coords.x, this.attr._secondSwap_coords.y).setColor(Game.UIMode.DEFAULT_COLOR_BG));
-        }else{
-          console.log("can't shift there");
+      if(this.attr_inSecondSwap){
+        console.log("moving second swap coords");
+        if(this.getCurrentRoom().setSecondSelected(this.attr._secondSwap_coords.x, this.attr._secondSwap_coords.y)){
+          console.log("updating second swap coords");
+          this.attr._secondSwap_coords = {x:this.attr._secondSwap_coords.x + dx, y: this.attr._secondSwap_coords.y +dy };
         }
       }else{
-        if(this.attr._firstSwap_coords.x + dx > 0 && this.attr._firstSwap_coords.x + dx <= dims.x &&
-        this.attr._firstSwap_coords.y + dy > 0 && this.attr._firstSwap_coords.y + dy <= dims.y){
-          this.attr._firstSwap_coords = {x: this.attr._firstSwap_coords.x + dx, y: this.attr._firstSwap_coords.y + dy};
-        }else{
-          console.log("can't shift there");
+        console.log("moving first swap coords");
+        if(this.getCurrentRoom().setFirstSelected(this.attr._firstSwap_coords.x, this.attr._firstSwap_coords.y)){
+          console.log("updating first swap coords");
+          this.attr._firstSwap_coords = {x:this.attr._firstSwap_coords.x + dx, y: this.attr._firstSwap_coords.y +dy };
         }
       }
-
+      return false;
     }else{
       this.moveAvatar(dx,dy);
-      //this.moveCamera(0, -1);
+      return true;
     }
   },
 
