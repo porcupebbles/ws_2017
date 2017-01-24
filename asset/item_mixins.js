@@ -5,7 +5,7 @@ Game.ItemMixin.MeleeAttack = {
     mixinName: 'MeleeAttack',
     mixinGroup: 'CombatItems',
     listeners: {
-      'attack': function(){
+      'prepare_attack': function(evtData){
         this.setDurability(Game.util.calcBreak(this.getDurability()));
         if(this.getDurability() == 0){
           //send alert here
@@ -39,6 +39,21 @@ Game.ItemMixin.Armor = {
     mixinName: 'Armor',
     mixinGroup: 'CombatItems',
     listeners: {
+      'used': function(evtData){
+        if(Game.messageCounters.armor == 1){
+          Game.Message.send("Sven wonders what you want him to do with this armor. Sven is already wearing it. What more do you want of Sven?");
+          Game.messageCounters.armor = 2;
+        }else if(Game.messageCounters.armor == 2){
+          Game.Message.send("Sven thinks armor is for wearing. Please enlighten Sven if you know something Sven doesn't");
+          Game.messageCounters.armor = 3;
+        }else if (Game.messageCounters.armor == 3){
+          Game.Message.send("Sven thinks you aren't that bright. Maybe next time Sven asks you to \"use\" your shirt");
+          Game.Message.send("What does that mean? Sven doesn't know and Sven doesn't care");
+          Game.messageCounters.armor = 4;
+        }else{
+          Game.Message.send("Sven can't use Armor");
+        }
+      }
 
     },
     stateNamespace: '_Armor_attr',

@@ -1,7 +1,5 @@
 Game.EntityMixin = {};
 
-// Mixins have a META property is is info about/for the mixin itself and then all other properties. The META property is NOT copied into objects for which this mixin is used - all other properies ARE copied in.
-
 Game.EntityMixin.PlayerMessager = {
   META: {
     mixinName: 'PlayerMessager',
@@ -10,11 +8,13 @@ Game.EntityMixin.PlayerMessager = {
       'walkForbidden': function(evtData) {
         Game.Message.send('you can\'t walk into the '+evtData.target.getName());
         Game.renderMessage();
+        //Game.Message.ageMessages();
       },
 
       'attackAvoided': function(evtData) {
         Game.Message.send('you avoided the '+evtData.attacker.getName());
         Game.renderMessage();
+        //Game.Message.ageMessages(); // NOTE: maybe not do this? If surrounded by multiple attackers messages could be aged out before being seen...
       },
       'attackMissed': function(evtData) {
         Game.Message.send('you missed the '+evtData.recipient.getName());
@@ -31,57 +31,17 @@ Game.EntityMixin.PlayerMessager = {
       'damagedBy': function(evtData) {
         Game.Message.send('the '+evtData.damager.getName()+' hit you for '+evtData.damageAmount);
         Game.renderMessage();
+        //Game.Message.ageMessages();  // NOTE: maybe not do this? If surrounded by multiple attackers messages could be aged out before being seen...
       },
       'killed': function(evtData) {
         Game.Message.send('you were killed by the '+evtData.killedBy.getName());
-        Game.renderMessage();
+        Game.renderDisplayMessage();
+        //Game.Message.ageMessages();
       }
     }
   }
 //    Game.Message.send(msg);
 };
-
-//this is questionable honestly
-Game.EntityMixin.Inventory = {
-  META: {
-    mixinName: 'Inventory',
-    mixinGroup: 'item_handling',
-    stateNamespace: '_Inventory_attr',
-    stateModel: {
-      inventory: [],
-      equippedWeapon: null
-    },
-    listeners:{
-      'getExtraDamage': function(){
-        return this
-      }
-    }
-  },
-  removeItem: function(item){
-    for(var i = 0; i<this.attr._Inventory_attr.inventory.length; i++){
-      if(item == this.attr._Inventory_attr.inventory[i]){
-        var theItem = this.attr._Inventory_attr.inventory[i];
-        this.attr._Inventory_attr.inventory.splice(i, 1);
-        return theItem;
-      }
-    }
-    return null;
-  },
-  removeItemAt: function(index){
-    if(this.attr._Inventory_attr.inventory.length >= (index-1)){
-      var theItem = this.attr._Inventory_attr.inventory[i];
-      this.attr._Inventory_attr.inventory.splice(index, 1);
-      return theItem;
-    }
-    return null;
-  },
-  getWeaponAttack: function(){
-    // if(this.attr._Inventory_attr.equippedWeapon){
-    //   return this.attr._Inventory_attr.equippedWeapon;
-    // }
-    // return this.attr._Inventory_attr.equippedWeapon;
-  }
-},
 
 Game.EntityMixin.PlayerActor = {
   META: {
@@ -109,13 +69,13 @@ Game.EntityMixin.PlayerActor = {
         setTimeout(function() { // NOTE: this tiny delay ensures event calls happen in the right order (yes, this is a bit of a hack... might be better to make a postChronicalKill event, though that's also a bit of a hack...)
           var victoryCheckResp = self.raiseSymbolActiveEvent('calcKillsOf',{entityName:'attack slug'});
           if (Game.util.compactNumberArray_add(victoryCheckResp.killCount) >= 3) {
-            Game.switchUIMode(Game.UIMode.gameWin);
+            Game.switchUIMode("gameWin");
           }
         },1);
       },
       'killed': function(evtData) {
         //Game.TimeEngine.lock();
-        Game.switchUiMode(Game.UIMode.gameLose);
+        Game.switchUIMode("gameLose");
       }
     }
   },
@@ -170,8 +130,6 @@ Game.EntityMixin.WalkerCorporeal = {
             return {madeAdjacentMove:false};
           }
 
-          //picking up items here
-
           if (map.getEntity(targetX,targetY)) { // can't walk into spaces occupied by other entities
             this.raiseSymbolActiveEvent('bumpEntity',{actor:this,recipient:map.getEntity(targetX,targetY)});
             // NOTE: should bumping an entity always take a turn? might have to get some return data from the event (once event return data is implemented)
@@ -179,6 +137,16 @@ Game.EntityMixin.WalkerCorporeal = {
           }
           var targetTile = map.getTile(targetX,targetY);
           if (targetTile.isWalkable()) {
+            //edited, test this a lot
+            if(map.getItems(targetX, targetY).length > 0){
+              var pickedUp = this.raiseSymbolActiveEvent('availableItems', {items: map.getItems(targetX, targetY)});
+              if(pickedUp[0]){
+                for(var i = 0; i < pickedUp[0].length; i++){
+                  map.extractItemAt(pickedUp[0][i], targetX, targetY);
+                }
+              }
+            }
+
             this.setPos(targetX,targetY);
             var myMap = this.getMap();
             if (myMap) {
@@ -318,10 +286,10 @@ Game.EntityMixin.MeleeAttacker = {
     },
     listeners: {
       'bumpEntity': function(evtData) {
-        console.log('MeleeAttacker bumpEntity');
+        // console.log('MeleeAttacker bumpEntity');
         var hitValResp = this.raiseSymbolActiveEvent('calcAttackHit');
         var avoidValResp = evtData.recipient.raiseSymbolActiveEvent('calcAttackAvoid');
-        Game.util.cdebug(avoidValResp);
+        // Game.util.cdebug(avoidValResp);
         var hitVal = Game.util.compactNumberArray_add(hitValResp.attackHit);
         var avoidVal = Game.util.compactNumberArray_add(avoidValResp.attackAvoid);
         if (ROT.RNG.getUniform()*(hitVal+avoidVal) > avoidVal) {
@@ -340,12 +308,8 @@ Game.EntityMixin.MeleeAttacker = {
         return {attackHit:this.getAttackHit()};
       },
       'calcAttackDamage': function(evtData) {
-        // // console.log('MeleeAttacker bumpEntity');
-        // var dam = this.getAttackDamage();
-        // if(this.hasMixin('Inventory')){
-        //     dam = dam +
-        // }
-        // return {attackDamage:dam};
+        // console.log('MeleeAttacker bumpEntity');
+        return {attackDamage:this.getAttackDamage()};
       }
 
     }
@@ -714,5 +678,87 @@ Game.EntityMixin.AlertableChaserActor = {
     this.raiseSymbolActiveEvent('actionDone');
     // console.log("end wander acting");
     Game.TimeEngine.unlock();
+  }
+},
+//this is questionable honestly
+Game.EntityMixin.Inventory = {
+  META: {
+    mixinName: 'Inventory',
+    mixinGroup: 'item_handling',
+    stateNamespace: '_Inventory_attr',
+    stateModel: {
+      inventory: [],
+      equippedWeapon: null
+    },
+    listeners:{
+      'availableItems': function(evtData){
+        var added = [];
+        for(var i = 0; i < evtData.items.length; i++){
+          if(this.addItem(evtData.items[i])){
+            added.push(evtData.items[i]);
+          }
+        }
+        return added;
+      }
+    }
+  },
+  equipWeapon: function(toEquip){
+    var oldWeapon = this.attr._Inventory_attr.equipWeapon;
+    this.attr._Inventory_attr.equipWeapon = toEquip;
+    return oldWeapon;
+  },
+  getItems: function(){
+    return this.attr._Inventory_attr.inventory;
+  },
+  getEquippedWeapon: function(){
+    return this.attr._Inventory_attr.equippedWeapon;
+  },
+  useItem: function(idx){
+    if(this.getItems()[idx]){
+      //bad practive should clean up at some point
+      if(this.getItems()[idx].hasMixin('MeleeAttack')){
+        var oldWeapon = this.equipWeapon(this.getItems()[idx]);
+        if(oldWeapon){
+          this.getItems()[idx] = oldWeapon;
+        }else{
+          this.getItems().splice(idx, 1);
+        }
+      }
+      this.getItems()[idx].raiseSymbolActiveEvent('used');//gotta flesh this out
+    }else{
+      Game.Message.send("Sven thinks that slot is empty");
+    }
+  },
+  addItem: function(item){
+    if(this.attr._Inventory_attr.inventory.length < 4){
+      this.attr._Inventory_attr.inventory.push(item);
+      return true;
+    }
+    Game.Message.send("Sven has no room for this " + item.getName());
+    return false;
+  },
+  removeItem: function(item){
+    for(var i = 0; i<this.attr._Inventory_attr.inventory.length; i++){
+      if(item == this.attr._Inventory_attr.inventory[i]){
+        var theItem = this.attr._Inventory_attr.inventory[i];
+        this.attr._Inventory_attr.inventory.splice(i, 1);
+        return theItem;
+      }
+    }
+    return null;
+  },
+  removeItemAt: function(index){
+    if(this.attr._Inventory_attr.inventory.length >= (index-1)){
+      var theItem = this.attr._Inventory_attr.inventory[i];
+      this.attr._Inventory_attr.inventory.splice(index, 1);
+      return theItem;
+    }
+    return null;
+  },
+  getWeaponAttack: function(){
+    // if(this.attr._Inventory_attr.equippedWeapon){
+    //   return this.attr._Inventory_attr.equippedWeapon;
+    // }
+    // return this.attr._Inventory_attr.equippedWeapon;
   }
 };

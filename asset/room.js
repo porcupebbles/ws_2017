@@ -10,7 +10,8 @@ Game.Room = function(roomTileSetName, pos, map){
     _height: info.height,
     _first_selected: null,
     _second_selected: null,
-    _enemies: info.enemies || []
+    _enemies: info.enemies || [],
+    _items: info.items || []
   }
   this.attr._block_x = this.attr._width/this.attr._block_dim.width;
   this.attr._block_y = this.attr._height/this.attr._block_dim.height;
@@ -19,6 +20,9 @@ Game.Room = function(roomTileSetName, pos, map){
 
 Game.Room.prototype.getEnemies = function(){
   return this.attr._enemies;
+};
+Game.Room.prototype.getItems = function(){
+  return this.attr._items;
 };
 //x and y must fall in the range
 Game.Room.prototype.setFirstSelected = function(px, py){
@@ -204,25 +208,31 @@ Game.Room.prototype.swap = function(entry1, entry2){
   for(var i=0; i<this.attr._block_dim.width; i++){
     for(var j=0; j<this.attr._block_dim.height; j++){
       var ent1 = map.extractEntityAt({x:cx1 + i, y:cy1 + j});
-      var item1 = map.extractItemAt({x:cx1 + i, y:cy1 + j});
       if(ent1){
         console.log("placed entity into toReplace");
         ent1.setBg(Game.UIMode.DEFAULT_COLOR_BG);
         Game.toReplace[ent1.getId()] = {entity: ent1, pos: {x:cx2 + i, y:cy2 + j}};
       }
-      if(item1){
-        item1.setBg(Game.UIMode.DEFAULT_COLOR_BG);
-        Game.toReplace[item1.getId()] = {item: item1, pos: {x:cx2 + i, y:cy2 + j}};
-      }
       var ent2 = map.extractEntityAt({x:cx2 + i, y:cy2 + j});
-      var item2 = map.extractItemAt({x:cx2 + i, y:cy2 + j});
       if(ent2){
         ent2.setBg(Game.UIMode.DEFAULT_COLOR_BG);
         Game.toReplace[ent2.getId()] = {entity: ent2, pos: {x:cx1 + i, y:cy1 + j}};
       }
-      if(item2){
-        item2.setBg(Game.UIMode.DEFAULT_COLOR_BG);
-        Game.toReplace[item2.getId()] = {item: item2, pos: {x:cx1 + i, y:cy1 + j}};
+      var items1 = map.getItems({x:cx1 + i, y:cy1 + j});
+      for(var k = 0; k < items1.length; k++){
+        var item1 = map.extractItemAt(items1[k],{x:cx1 + i, y:cy1 + j});
+        if(item1){
+          item1.setBg(Game.UIMode.DEFAULT_COLOR_BG);
+          Game.toReplace[item1.getId()] = {item: item1, pos: {x:cx2 + i, y:cy2 + j}};
+        }
+      }
+      var items2 = map.getItems({x:cx2 + i, y:cy2 + j});
+      for(var k = 0; k<items2.length; k++){
+        var item2 = map.extractItemAt(items2[k], {x:cx2 + i, y:cy2 + j});
+        if(item2){
+          item2.setBg(Game.UIMode.DEFAULT_COLOR_BG);
+          Game.toReplace[item2.getId()] = {item: item2, pos: {x:cx1 + i, y:cy1 + j}};
+        }
       }
       //handle items here too
     }

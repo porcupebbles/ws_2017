@@ -1,19 +1,14 @@
 Game.RoomTileSets = {
 
-    blockTemplates: {
-      one: Game.util.thefunc(),
-      two: Game.util.thefunx()
-    },
-
     TutorialRoom1: {
-      _width: 16,
-      _height: 16,
+      _width: 8,
+      _height: 8,
       getRoomInfo: function(){
-        var blocdim = {width: 8, height: 8};
+        var blocdim = {width: 2, height: 2};
         var roomTiles = Game.util.init2DArray(this._width, this._height, Game.Tile.nullTile);
         for(var i = 0; i < this._width; i++){
           for(var j = 0; j < this._height; j++){
-            roomTiles[i][j] = new Game.Tile({name:'floor', chr:'.', walkable:true, transparent: true});
+            roomTiles[i][j] = new Game.Tile({name:'floor', chr:' ', walkable:true, transparent: true});
           }
         }
         //the 2-d array here will get more complex
@@ -29,34 +24,43 @@ Game.RoomTileSets = {
         var roomTiles = Game.util.init2DArray(this._width, this._height, Game.Tile.nullTile);
         for(var i = 0; i < this._width; i++){
           for(var j = 0; j < this._height; j++){
-            if(i < (this._width/2 ) && j < (this._height/2 )){
-              roomTiles[i][j] = new Game.Tile({name:'floor', chr:'.', walkable:true, transparent: true});
-            }else if(i > this._width/2 && j > this._height/2 ){
-              roomTiles[i][j] = new Game.Tile({name:'floor', chr:'.', walkable:true, transparent: true});
+            if(i < (this._width/2) && j < (this._height/2 )){
+              roomTiles[i][j] = new Game.Tile({name:'floor', chr:' ', walkable:true, transparent: true});
+            }else if(i >= this._width/2 && j >= (this._height/2)){
+              roomTiles[i][j] = new Game.Tile({name:'floor', chr:' ', walkable:true, transparent: true});
             }else{
               roomTiles[i][j] = new Game.Tile({name: 'roomWall', chr:'#', room: true, fg: '#605db1', transparent: true});
             }
           }
         }
+
+        var theitems = [];
+        for(var i = 0; i <5; i++){
+          theitems.push({name:'rock'});
+        }
+
         //the 2-d array here will get more complex
         return {block_dim: blocdim, tiles: roomTiles,
-        width: this._width, height: this._height};
+        width: this._width, height: this._height, items: theitems};
       }
     },
     TutorialRoom3: {
       _width: 16,
       _height: 16,
       getRoomInfo: function(){
-        var blocdim = {width: this._width/2, height: this._height/2};
+        var blocdim = {width: 2, height: 2};
         var roomTiles = Game.util.init2DArray(this._width, this._height, Game.Tile.nullTile);
         for(var i = 0; i < this._width; i++){
           for(var j = 0; j < this._height; j++){
-            if(i < (this._width/2) && j < (this._height/2 )){
-              roomTiles[i][j] = new Game.Tile({name:'floor', chr:'.', walkable:true, transparent: true});
-            }else if(i > this._width/2 && j > this._height/2 ){
-              roomTiles[i][j] = new Game.Tile({name:'floor', chr:'.', walkable:true, transparent: true});
-            }else{
-              roomTiles[i][j] = new Game.Tile({name: 'roomWall', chr:'#', room: true, fg: '#605db1', transparent: true});
+              roomTiles[i][j] = new Game.Tile({name:'floor', chr:' ', walkable:true, transparent: true});
+          }
+        }
+
+        //fix this part later
+        for(var i = 0; i < this._width; i = i + 2){
+          for(var j = 0; j < this._height; j = j + 2){
+            if((i%4 == 0 && j%4 == 0) || ((i-2)%4 == 0 && (j-2)%4 == 0)){
+              roomTiles = Game.util.setFeature(roomTiles, Game.util.wallBlock(2, 2), {x: i, y: j});
             }
           }
         }
@@ -86,13 +90,18 @@ Game.RoomTileSets = {
           if (v === 1) {
             fullTiles[x][y] = new Game.Tile({name: 'roomWall', chr:'#', room: true, fg: '#605db1', transparent: true});
           } else {
-            fullTiles[x][y] = new Game.Tile({name:'floor', chr:'.', walkable:true, transparent: true});
+            fullTiles[x][y] = new Game.Tile({name:'floor', chr:' ', walkable:true, transparent: true});
           }
         });
 
         var creatures = [];
         for(var i = 0; i < 10; i++){
           creatures.push({name: 'cave wyrm'});
+        }
+
+        var theitems = [];
+        for(var i = 0; i < 10; i++){
+          theitems.push({name: 'rock'});
         }
 
         var roomTiles = Game.util.init2DArray(this._width, this._height, Game.Tile.nullTile);
@@ -106,7 +115,7 @@ Game.RoomTileSets = {
           }
         }
 
-        return {block_dim: blocdim, tiles: roomTiles, width: this._width, height: this._height, enemies: creatures};
+        return {block_dim: blocdim, tiles: roomTiles, width: this._width, height: this._height, enemies: creatures, items: theitems};
       }
     }
 

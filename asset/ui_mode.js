@@ -113,6 +113,22 @@ Game.UIMode.gamePlay = {
     display.drawText(1,3,"avatar y: "+this.getAvatar().getY(),fg,bg); // DEV
     display.drawText(1,4,"Turns: " + this.getAvatar().getTurns(),fg,bg);
     display.drawText(1,5,"HP: " + this.getAvatar().getCurHp(),fg,bg);
+
+    //equippment stuff
+    if(this.getAvatar().getEquippedWeapon()){
+      display.drawText(1,6, "Equipped Weapon: " + this.getAvatar().getEquippedWeapon().getName(),fg,bg);
+    }else{
+      display.drawText(1,6, "Equipped Weapon: ---",fg,bg);
+    }
+
+    var the_items = this.getAvatar().getItems();
+    for(var i = 0; i<4; i++){
+      if(the_items[i]){
+        display.drawText(1,7+i, "Item " + (i+1) + ": " + the_items[i].getName(),fg,bg);
+      }else{
+        display.drawText(1,7+i, "Item " + (i+1) + ": ---",fg,bg);
+      }
+    }
   },
   moveAvatar: function (pdx,pdy) {
     // console.log('moveAvatar '+pdx+','+pdy);
@@ -176,6 +192,18 @@ Game.UIMode.gamePlay = {
       case Game.getKey('right'):
       tookTurn = this.handleDirectional(1, 0);
       break;
+      case Game.getKey('item1'):
+      this.getAvatar().useItem(0);
+      break;
+      case Game.getKey('item2'):
+      this.getAvatar().useItem(1);
+      break;
+      case Game.getKey('item3'):
+      this.getAvatar().useItem(2);
+      break;
+      case Game.getKey('item4'):
+      this.getAvatar().useItem(3);
+      break;
       case Game.getKey("save_screen"):
       Game.switchUIMode(Game.UIMode.gameSave);
       break;
@@ -232,8 +260,6 @@ Game.UIMode.gamePlay = {
   },
 
   handleDirectional(dx, dy){
-    console.log("avatar");
-    console.dir(this.getAvatar());
     if(this.attr._inSwap){
       if(this.attr._inSecondSwap){
         if(this.getCurrentRoom().setSecondSelected(this.attr._secondSwap_coords.x + dx, this.attr._secondSwap_coords.y + dy)){
@@ -526,7 +552,7 @@ Game.UIMode.gameOptions = {
         }
       }else if(inputData.key == 'x'){
         Game.switchUIMode(Game.UIMode.gamePlay);
-      
+
       }else{
         Game.keyBinding.setKey(kb[this.selected_function].label, inputData.key);
       }

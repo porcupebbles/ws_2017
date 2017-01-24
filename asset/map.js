@@ -15,11 +15,27 @@ Game.Map = function (mapTileSetName, presetId) {
     _inRoom: info.inRoom || false
   };
 
+  //initialize stuff with the rooms
   for(var i = 0; i < this.attr._rooms.length; i++){
     this.attr._rooms[i].setMap(this);
     var creatures = this.attr._rooms[i].getEnemies();
+    var room_pos = this.attr._rooms[i].getPos();
     for(var j = 0; j < creatures.length; j++){
-      this.addEntity(Game.EntityGenerator.create(creatures[i].name), this.attr._rooms[i].getRandomWalkableLocation());
+      if(!creatures[i].pos){
+        var rand_pos_room = this.attr._rooms[i].getRandomWalkableLocation();
+        this.addEntity(Game.EntityGenerator.create(creatures[i].name), {x: room_pos.x+rand_pos_room.x, y: room_pos.y+rand_pos_room.y});
+      }else{
+        this.addEntity(Game.EntityGenerator.create(creatures[i].name), {x:creatures[i].pos.x+room_pos.x, y: creatures[i].pos.y+room_pos.y});
+      }
+    }
+    var items = this.attr._rooms[i].getItems();
+    for(var j = 0; j < items.length; j++){
+      if(!items[i].pos){
+        var rand_pos_room = this.attr._rooms[i].getRandomWalkableLocation();
+        this.addItem(Game.ItemGenerator.create(items[i].name), {x: room_pos.x+rand_pos_room.x, y: room_pos.y+rand_pos_room.y});
+      }else{
+        this.addItem(Game.ItemGenerator.create(items[i].name), {x:items[i].pos.x+room_pos.x, y: items[i].pos.y+room_pos.y});
+      }
     }
   }
 

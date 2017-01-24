@@ -12,7 +12,11 @@ Game.keyBinding = {
       {label: 'save_screen', keyUsed: 't'},
       {label: 'options', keyUsed: 'q'},
       {label: 'swap', keyUsed: ' '},
-      {label: 'swap_confirm', keyUsed: 'v'}
+      {label: 'swap_confirm', keyUsed: 'v'},
+      {label: 'item1', keyUsed: '1'},
+      {label: 'item2', keyUsed: '2'},
+      {label: 'item3', keyUsed: '3'},
+      {label: 'item4', keyUsed: '4'}
     ]
   },
 
@@ -28,7 +32,11 @@ Game.keyBinding = {
        {label: 'save_screen', keyUsed: 't'},
        {label: 'options', keyUsed: 'q'},
        {label: 'swap', keyUsed: ' '},
-       {label: 'swap_confirm', keyUsed: 'v'}
+       {label: 'swap_confirm', keyUsed: 'v'},
+       {label: 'item1', keyUsed: '1'},
+       {label: 'item2', keyUsed: '2'},
+       {label: 'item3', keyUsed: '3'},
+       {label: 'item4', keyUsed: '4'}
     ],
     arrows: [
        {label: 'up', keyUsed: 'ArrowUp'},
@@ -40,7 +48,11 @@ Game.keyBinding = {
        {label: 'save_screen', keyUsed: 't'},
        {label: 'options', keyUsed: 'q'},
        {label: 'swap', keyUsed: ' '},
-       {label: 'swap_confirm', keyUsed: 'v'}
+       {label: 'swap_confirm', keyUsed: 'v'},
+       {label: 'item1', keyUsed: '1'},
+       {label: 'item2', keyUsed: '2'},
+       {label: 'item3', keyUsed: '3'},
+       {label: 'item4', keyUsed: '4'}
     ]
   },
 

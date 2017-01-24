@@ -40,6 +40,11 @@ var Game = {
   Scheduler: null,
   TimeEngine: null,
 
+  messageCounters: {
+    armor: 1
+
+  },
+
   display: {
     main: {
       w: 80,

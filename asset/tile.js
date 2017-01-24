@@ -38,7 +38,7 @@ Game.Tile.prototype.isTransparant = function() {
 Game.Tile.nullTile = new Game.Tile({name:'nullTile'});
 Game.Tile.floorTile = new Game.Tile({name:'floor', chr:'.', walkable:true, transparent: true});
 Game.Tile.wallTile = new Game.Tile({name:'wall',chr:'#', transparent: true});
-Game.Tile.hallTile = new Game.Tile({name: 'hall', chr: '.', hall: true , walkable: true, transparent: true});
+Game.Tile.hallTile = new Game.Tile({name: 'hall', chr: ' ', hall: true , walkable: true, transparent: true});
 
 Game.Tile.roomFloor = new Game.Tile({name: 'roomFloor', chr: '.', room: true, walkable: true, fg: '#605db1', transparent: true});
 Game.Tile.roomWall = new Game.Tile({name: 'roomWall', chr:'#', room: true, fg: '#605db1', transparent: true});

@@ -112,17 +112,17 @@ Game.util = {
     return ret;
   },
   //it has to be an array of symbols
-  setColor: function(array, color){
-    for(var i = 0; i<array.length; i++){
-      for(var j = 0; j<array.length[0].length; j++){
-        array[i][j] = array[i][j].setBg(color);
-      }
-    }
-  },
+  // setColor: function(array, color){
+  //   for(var i = 0; i<array.length; i++){
+  //     for(var j = 0; j<array.length[0].length; j++){
+  //       array[i][j] = array[i][j].setBg(color);
+  //     }
+  //   }
+  // },
 
   //just for testing purposes at the moment
-  thefunc: function(){
-    var the = Game.util.init2DArray(8, 8, Game.Tile.nullTile);
+  wallBlock: function(x, y){
+    var the = Game.util.init2DArray(x, y, Game.Tile.nullTile);
     for(var i = 0; i < the.length; i++){
       for(var j = 0; j < the[0].length; j++){
         the[i][j] = new Game.Tile({name: 'roomWall', chr:'#', room: true, fg: '#605db1', transparent: true});
@@ -130,13 +130,31 @@ Game.util = {
     }
     return the;
   },
-  thefunx: function(){
-    var the = Game.util.init2DArray(8, 8, Game.Tile.nullTile);
+  floorBlock: function(x, y){
+    var the = Game.util.init2DArray(x, y, Game.Tile.nullTile);
     for(var i = 0; i < the.length; i++){
       for(var j = 0; j < the[0].length; j++){
-        the[i][j] = Game.Tile.floorTile = new Game.Tile({name:'floor', chr:'.', walkable:true, transparent: true});
+        the[i][j] = new Game.Tile({name:'floor', chr:'.', walkable:true, transparent: true});
       }
     }
     return the;
+  },
+  setFeature: function(mapArray, featureArray, pos){
+    for(var i = 0; i < featureArray.length; i++){
+      for(var j = 0; j < featureArray[0].length; j++){
+        if(featureArray[i][j] !== Game.Tile.nullTile){
+          mapArray[pos.x+i][pos.y+j] = featureArray[i][j];
+        }
+      }
+    }
+    return mapArray;
+  },
+  //super simple at the moment could definitely improve on this
+  calcBreak: function(dura){
+    if(Game.util.randomInt(0, 2) == 5){
+      return dura - 1;
+    }else{
+      return dura;
+    }
   }
 };

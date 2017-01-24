@@ -178,10 +178,10 @@ Game.MapTileSets = {
         mapTiles = Game.MapTileSets.setFeature(mapTiles, room.getTiles(), room.getPos());
         //console.log(i, ".", 3)
         if(i !== 4){
-          mapTiles = Game.MapTileSets.setFeature(mapTiles, Game.util.init2DArray(2, 1, Game.Tile.hallTile), {x:x_pos+room.getWidth(), y: 5});
+          mapTiles = Game.MapTileSets.setFeature(mapTiles, Game.util.init2DArray(10, 1, Game.Tile.hallTile), {x:x_pos+room.getWidth(), y: 5});
         }
         //console.log(i, ".", 4)
-        x_pos = x_pos + room.getWidth() + 2;
+        x_pos = x_pos + room.getWidth() + 10;
       }
 
       return {tiles: mapTiles, rooms: all_rooms};
