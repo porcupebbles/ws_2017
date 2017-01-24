@@ -155,5 +155,36 @@ Game.MapTileSets = {
 
       return {tiles: mapTiles, rooms: all_rooms};
     }
+  },
+
+  Tutorial: {
+    _width: 1000,
+    _height: 500,
+    getMapInfo: function(){
+      var mapTiles = Game.util.init2DArray(this._width, this._height, Game.Tile.wallTile);
+
+      var all_rooms = [];
+
+      var room_name = ['TutorialRoom1', 'TutorialRoom2', 'TutorialRoom3', 'mazeRoom'];
+      var x_pos = 0;
+      for(var i = 0; i < 4; i++){
+        //console.log(i, ".", 1)
+
+        var room = new Game.Room(room_name[i], {x:x_pos, y:0});
+
+        //console.dir(room);
+        //console.log(i, ".", 2)
+        all_rooms.push(room);
+        mapTiles = Game.MapTileSets.setFeature(mapTiles, room.getTiles(), room.getPos());
+        //console.log(i, ".", 3)
+        if(i !== 4){
+          mapTiles = Game.MapTileSets.setFeature(mapTiles, Game.util.init2DArray(2, 1, Game.Tile.hallTile), {x:x_pos+room.getWidth(), y: 5});
+        }
+        //console.log(i, ".", 4)
+        x_pos = x_pos + room.getWidth() + 2;
+      }
+
+      return {tiles: mapTiles, rooms: all_rooms};
+    }
   }
 };

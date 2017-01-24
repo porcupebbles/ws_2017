@@ -17,6 +17,10 @@ Game.Map = function (mapTileSetName, presetId) {
 
   for(var i = 0; i < this.attr._rooms.length; i++){
     this.attr._rooms[i].setMap(this);
+    var creatures = this.attr._rooms[i].getEnemies();
+    for(var j = 0; j < creatures.length; j++){
+      this.addEntity(Game.EntityGenerator.create(creatures[i].name), this.attr._rooms[i].getRandomWalkableLocation());
+    }
   }
 
   this._fov = null;

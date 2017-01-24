@@ -9,14 +9,17 @@ Game.Room = function(roomTileSetName, pos, map){
     _width: info.width,
     _height: info.height,
     _first_selected: null,
-    _second_selected: null
-
+    _second_selected: null,
+    _enemies: info.enemies || []
   }
   this.attr._block_x = this.attr._width/this.attr._block_dim.width;
   this.attr._block_y = this.attr._height/this.attr._block_dim.height;
 
 };
 
+Game.Room.prototype.getEnemies = function(){
+  return this.attr._enemies;
+};
 //x and y must fall in the range
 Game.Room.prototype.setFirstSelected = function(px, py){
   if(px<=0 || px>this.attr._block_x || py<= 0 || py>this.attr._block_y || this.containsSwappable(px, py)){

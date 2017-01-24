@@ -76,10 +76,10 @@ Game.EntityMixin.Inventory = {
     return null;
   },
   getWeaponAttack: function(){
-    if(this.attr._Inventory_attr.equippedWeapon){
-      return this.attr._Inventory_attr.equippedWeapon.
-    }
-    return this.attr._Inventory_attr.equippedWeapon
+    // if(this.attr._Inventory_attr.equippedWeapon){
+    //   return this.attr._Inventory_attr.equippedWeapon;
+    // }
+    // return this.attr._Inventory_attr.equippedWeapon;
   }
 },
 
@@ -318,12 +318,12 @@ Game.EntityMixin.MeleeAttacker = {
     },
     listeners: {
       'bumpEntity': function(evtData) {
-        // console.log('MeleeAttacker bumpEntity');
-        //var hitValResp = this.raiseSymbolActiveEvent('calcAttackHit');
-        //var avoidValResp = evtData.recipient.raiseSymbolActiveEvent('calcAttackAvoid');
-        // Game.util.cdebug(avoidValResp);
-        //var hitVal = Game.util.compactNumberArray_add(hitValResp.attackHit);
-        //var avoidVal = Game.util.compactNumberArray_add(avoidValResp.attackAvoid);
+        console.log('MeleeAttacker bumpEntity');
+        var hitValResp = this.raiseSymbolActiveEvent('calcAttackHit');
+        var avoidValResp = evtData.recipient.raiseSymbolActiveEvent('calcAttackAvoid');
+        Game.util.cdebug(avoidValResp);
+        var hitVal = Game.util.compactNumberArray_add(hitValResp.attackHit);
+        var avoidVal = Game.util.compactNumberArray_add(avoidValResp.attackAvoid);
         if (ROT.RNG.getUniform()*(hitVal+avoidVal) > avoidVal) {
           var hitDamageResp = this.raiseSymbolActiveEvent('calcAttackDamage');
           var damageMitigateResp = evtData.recipient.raiseSymbolActiveEvent('calcDamageMitigation');
@@ -340,12 +340,12 @@ Game.EntityMixin.MeleeAttacker = {
         return {attackHit:this.getAttackHit()};
       },
       'calcAttackDamage': function(evtData) {
-        // console.log('MeleeAttacker bumpEntity');
-        var dam = this.getAttackDamage();
-        if(this.hasMixin('Inventory')){
-            dam = dam +
-        }
-        return {attackDamage:dam};
+        // // console.log('MeleeAttacker bumpEntity');
+        // var dam = this.getAttackDamage();
+        // if(this.hasMixin('Inventory')){
+        //     dam = dam +
+        // }
+        // return {attackDamage:dam};
       }
 
     }

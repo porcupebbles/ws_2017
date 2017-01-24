@@ -205,7 +205,7 @@ Game.UIMode.gamePlay = {
           this.getCurrentRoom().swap(this.attr._firstSwap_coords, this.attr._secondSwap_coords);
           this.attr._inSwap = false;
           this.attr._inSecondSwap = false;
-          //tookTurn = true;
+          tookTurn = true;
         }else{
           this.attr._inSecondSwap = true;
 
@@ -252,13 +252,13 @@ Game.UIMode.gamePlay = {
   },
 
   setupNewGame: function () {
-    this.setMap('first', new Game.Map('rooms'));
+    this.setMap('first', new Game.Map('Tutorial'));
 
     this.setAvatar(Game.EntityGenerator.create('avatar'));
 
     this.getMap().addEntity(this.getAvatar(),{x: 12, y: 5});
     this.setCameraToAvatar();
-
+    /*
     ////////////////////////////////////////////////////
     // dev code - just add some entities to the map
     var itemPos = '';
@@ -503,7 +503,11 @@ Game.UIMode.gameOptions = {
     for(var i = 0; i<kb.length; i++){
       key=Game.keyBinding.attr._curKeys[i].label;
       if(key != kb[this.selected_function].label){
-        display.drawText(1,2+i,kb[i].label+": "+kb[i].keyUsed);
+        if(kb[i].keyUsed == ' '){
+          display.drawText(1,2+i,kb[i].label+": space");
+        }else{
+          display.drawText(1,2+i,kb[i].label+": "+kb[i].keyUsed);
+        }
       }else{
         display.drawText(1,2+i,"%b{blue}"+kb[i].label+": "+kb[i].keyUsed);
       }
@@ -514,12 +518,15 @@ Game.UIMode.gameOptions = {
     if (inputType == 'keypress') {
       //this would also be the place to exclude any other keys that shouldn't be
       //modified
-      if(inputData.key == ' '){
+      if(inputData.key == 'z'){
         if(this.selected_function+1 < kb.length){
           this.selected_function++;
         }else{
           this.selected_function=0;
         }
+      }else if(inputData.key == 'x'){
+        Game.switchUIMode(Game.UIMode.gamePlay);
+      
       }else{
         Game.keyBinding.setKey(kb[this.selected_function].label, inputData.key);
       }

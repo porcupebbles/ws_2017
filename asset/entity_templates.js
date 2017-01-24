@@ -40,7 +40,7 @@ Game.EntityGenerator.learn({
 });
 
 Game.EntityGenerator.learn({
-  name: 'attack slug',
+  name: 'cave wyrm',
   chr:'~',
   fg:'#ff9',
   maxHp: 4,
