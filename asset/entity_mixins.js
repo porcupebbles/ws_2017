@@ -41,6 +41,48 @@ Game.EntityMixin.PlayerMessager = {
 //    Game.Message.send(msg);
 };
 
+//this is questionable honestly
+Game.EntityMixin.Inventory = {
+  META: {
+    mixinName: 'Inventory',
+    mixinGroup: 'item_handling',
+    stateNamespace: '_Inventory_attr',
+    stateModel: {
+      inventory: [],
+      equippedWeapon: null
+    },
+    listeners:{
+      'getExtraDamage': function(){
+        return this
+      }
+    }
+  },
+  removeItem: function(item){
+    for(var i = 0; i<this.attr._Inventory_attr.inventory.length; i++){
+      if(item == this.attr._Inventory_attr.inventory[i]){
+        var theItem = this.attr._Inventory_attr.inventory[i];
+        this.attr._Inventory_attr.inventory.splice(i, 1);
+        return theItem;
+      }
+    }
+    return null;
+  },
+  removeItemAt: function(index){
+    if(this.attr._Inventory_attr.inventory.length >= (index-1)){
+      var theItem = this.attr._Inventory_attr.inventory[i];
+      this.attr._Inventory_attr.inventory.splice(index, 1);
+      return theItem;
+    }
+    return null;
+  },
+  getWeaponAttack: function(){
+    if(this.attr._Inventory_attr.equippedWeapon){
+      return this.attr._Inventory_attr.equippedWeapon.
+    }
+    return this.attr._Inventory_attr.equippedWeapon
+  }
+},
+
 Game.EntityMixin.PlayerActor = {
   META: {
     mixinName: 'PlayerActor',
@@ -127,6 +169,8 @@ Game.EntityMixin.WalkerCorporeal = {
             this.raiseSymbolActiveEvent('walkForbidden',{target:Game.Tile.nullTile});
             return {madeAdjacentMove:false};
           }
+
+          //picking up items here
 
           if (map.getEntity(targetX,targetY)) { // can't walk into spaces occupied by other entities
             this.raiseSymbolActiveEvent('bumpEntity',{actor:this,recipient:map.getEntity(targetX,targetY)});
@@ -275,11 +319,11 @@ Game.EntityMixin.MeleeAttacker = {
     listeners: {
       'bumpEntity': function(evtData) {
         // console.log('MeleeAttacker bumpEntity');
-        var hitValResp = this.raiseSymbolActiveEvent('calcAttackHit');
-        var avoidValResp = evtData.recipient.raiseSymbolActiveEvent('calcAttackAvoid');
+        //var hitValResp = this.raiseSymbolActiveEvent('calcAttackHit');
+        //var avoidValResp = evtData.recipient.raiseSymbolActiveEvent('calcAttackAvoid');
         // Game.util.cdebug(avoidValResp);
-        var hitVal = Game.util.compactNumberArray_add(hitValResp.attackHit);
-        var avoidVal = Game.util.compactNumberArray_add(avoidValResp.attackAvoid);
+        //var hitVal = Game.util.compactNumberArray_add(hitValResp.attackHit);
+        //var avoidVal = Game.util.compactNumberArray_add(avoidValResp.attackAvoid);
         if (ROT.RNG.getUniform()*(hitVal+avoidVal) > avoidVal) {
           var hitDamageResp = this.raiseSymbolActiveEvent('calcAttackDamage');
           var damageMitigateResp = evtData.recipient.raiseSymbolActiveEvent('calcDamageMitigation');
@@ -297,7 +341,11 @@ Game.EntityMixin.MeleeAttacker = {
       },
       'calcAttackDamage': function(evtData) {
         // console.log('MeleeAttacker bumpEntity');
-        return {attackDamage:this.getAttackDamage()};
+        var dam = this.getAttackDamage();
+        if(this.hasMixin('Inventory')){
+            dam = dam +
+        }
+        return {attackDamage:dam};
       }
 
     }
