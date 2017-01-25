@@ -6,26 +6,26 @@ Game.EntityMixin.PlayerMessager = {
     mixinGroup: 'PlayerMessager',
     listeners: {
       'walkForbidden': function(evtData) {
-        Game.Message.send('you can\'t walk into the '+evtData.target.getName());
+        Game.Message.send('Sven can\'t walk into the '+evtData.target.getName());
         Game.renderMessage();
         //Game.Message.ageMessages();
       },
 
       'attackAvoided': function(evtData) {
-        Game.Message.send('you avoided the '+evtData.attacker.getName());
+        Game.Message.send('Sven avoided the '+evtData.attacker.getName());
         Game.renderMessage();
         //Game.Message.ageMessages(); // NOTE: maybe not do this? If surrounded by multiple attackers messages could be aged out before being seen...
       },
       'attackMissed': function(evtData) {
-        Game.Message.send('you missed the '+evtData.recipient.getName());
+        Game.Message.send('Sven missed the '+evtData.recipient.getName());
         Game.renderMessage();
       },
       'dealtDamage': function(evtData) {
-        Game.Message.send('you hit the '+evtData.damagee.getName()+' for '+evtData.damageAmount);
+        Game.Message.send('Sven hit the '+evtData.damagee.getName()+' for '+evtData.damageAmount);
         Game.renderMessage();
       },
       'madeKill': function(evtData) {
-        Game.Message.send('you killed the '+evtData.entKilled.getName());
+        Game.Message.send('Sven killed the '+evtData.entKilled.getName());
         Game.renderMessage();
       },
       'damagedBy': function(evtData) {
@@ -34,7 +34,7 @@ Game.EntityMixin.PlayerMessager = {
         //Game.Message.ageMessages();  // NOTE: maybe not do this? If surrounded by multiple attackers messages could be aged out before being seen...
       },
       'killed': function(evtData) {
-        Game.Message.send('you were killed by the '+evtData.killedBy.getName());
+        Game.Message.send('Sven was killed by the '+evtData.killedBy.getName());
         Game.renderDisplayMessage();
         //Game.Message.ageMessages();
       }
@@ -235,8 +235,9 @@ Game.EntityMixin.HitPoints = {
     listeners: {
       'attacked': function(evtData) {
         // console.log('HitPoints attacked');
+        var unAbsorbedDamage = this.raiseSymbolActiveEvent('hurt', {damageAmount: evtData.attackDamage});
 
-        this.takeHits(evtData.attackDamage);
+        this.takeHits(unAbsorbedDamage);
         this.raiseSymbolActiveEvent('damagedBy',{damager:evtData.attacker,damageAmount:evtData.attackDamage});
         evtData.attacker.raiseSymbolActiveEvent('dealtDamage',{damagee:this,damageAmount:evtData.attackDamage});
         if (this.getCurHp() <= 0) {
@@ -699,9 +700,19 @@ Game.EntityMixin.Inventory = {
           }
         }
         return added;
+      },
+      'hurt': function(evtData){
+        var curDamage = evtData.damageAmount;
+        for(var i = 0; i < this.getItems().length; i++){
+          if(curDamage != 0 && this.getItems()[i]){
+            curDamage = this.getItems()[i].raiseSymbolActiveEvent('hit_took', {damageAmount: curDamage});
+          }
+        }
+        return curDamage;
       }
     }
   },
+
   equipWeapon: function(toEquip){
     var oldWeapon = this.attr._Inventory_attr.equipWeapon;
     this.attr._Inventory_attr.equipWeapon = toEquip;
@@ -738,14 +749,21 @@ Game.EntityMixin.Inventory = {
     return false;
   },
   removeItem: function(item){
-    for(var i = 0; i<this.attr._Inventory_attr.inventory.length; i++){
-      if(item == this.attr._Inventory_attr.inventory[i]){
-        var theItem = this.attr._Inventory_attr.inventory[i];
-        this.attr._Inventory_attr.inventory.splice(i, 1);
-        return theItem;
+    //this could be sketchy
+    if(this.getEquippedWeapon()===item){
+      var oldWeapon = this.getEquippedWeapon();
+      this.equipWeapon(undefined);
+      return oldWeapon;
+    }else{
+      for(var i = 0; i<this.attr._Inventory_attr.inventory.length; i++){
+        if(item === this.attr._Inventory_attr.inventory[i]){
+          var theItem = this.attr._Inventory_attr.inventory[i];
+          this.attr._Inventory_attr.inventory.splice(i, 1);
+          return theItem;
+        }
       }
+      return null;
     }
-    return null;
   },
   removeItemAt: function(index){
     if(this.attr._Inventory_attr.inventory.length >= (index-1)){

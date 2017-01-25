@@ -4,6 +4,12 @@ Game.Message = {
     _messageNum: 0
   },
 
+
+  presets: {
+    armor_use: {cur: 0, max: Game.PresetMessages.armor_use.length,lines: Game.PresetMessages.armor_use},
+    armor_loss: {cur: 0, max: Game.PresetMessages.armor_loss.length, lines: Game.PresetMessages.armor_loss}
+  },
+
   render: function (display) {
     display.clear();
     if(this.attr._curMessages.length != 0){
@@ -21,5 +27,16 @@ Game.Message = {
   },
   setDisplayedMessage: function(newNum){
     this.attr._messageNum = newNum;
-  }
+  },
+  sendPreset: function(type){
+    console.log("presets");
+    console.dir(this.presets);
+    console.log("type");
+    console.dir(this.presets[type]);
+    var num = this.presets[type].cur;
+    if(num != this.presets[type].max){
+      this.presets[type] = num + 1;
+    }
+  },
+
 };

@@ -158,3 +158,10 @@ Game.util = {
     }
   }
 };
+
+Game.PresetMessages = {
+  armor_use: ["Sven wonders what you want him to do with this armor. Sven is already wearing it. What more do you want of Sven?",
+  "Sven thinks armor is for wearing. Please enlighten Sven if you know something Sven doesn't", "Sven thinks you aren't that bright. Maybe next time Sven asks you to \"use\" your shirt. What does that mean? Sven doesn't know and Sven doesn't care",
+  "Sven can't use Armor"],
+  armor_loss: ["Sven is saddened by the loss of his armor"]
+};

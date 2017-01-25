@@ -41,7 +41,8 @@ var Game = {
   TimeEngine: null,
 
   messageCounters: {
-    armor: 1
+    armor: 1,
+    armor_loss: 1
 
   },
 

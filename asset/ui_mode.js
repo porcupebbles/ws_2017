@@ -49,6 +49,7 @@ Game.UIMode.gamePlay = {
     if (this.attr._avatarId) {
       this.setCameraToAvatar();
     }
+
     Game.TimeEngine.unlock();
     Game.refresh();
   },
@@ -100,6 +101,7 @@ Game.UIMode.gamePlay = {
   },
   render: function(display){
     var seenCells = this.getAvatar().getVisibleCells();
+    Game.Message.sendPreset("armor_use");
     this.getMap().renderOn(display,this.attr._cameraX,this.attr._cameraY,{
       visibleCells:seenCells,
       maskedCells:this.getAvatar().getRememberedCoordsForMap()
@@ -245,7 +247,7 @@ Game.UIMode.gamePlay = {
           this.getCurrentRoom().setSecondSelected(this.attr._secondSwap_coords.x, this.attr._secondSwap_coords.y);
         }
       }else{
-        console.log("not in swap. Cannot confirm");
+        console.log("not in_swap");
       }
       break;
     }

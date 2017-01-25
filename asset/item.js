@@ -11,3 +11,9 @@ Game.Item = function(template) {
     Game.DATASTORE.ITEM[this.attr._id] = this;
 };
 Game.Item.extend(Game.SymbolActive);
+
+//this doesn't provide a way to remove items on the map
+Game.Item.destroy = function(){
+  Game.getAvatar().removeItem(this); //this will be a sticking point if there are ever other entities with inventories
+  Game.DATASTORE.ITEM[this.getId()] = undefined;
+};

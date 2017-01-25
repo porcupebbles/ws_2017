@@ -53,6 +53,9 @@ Game.ItemMixin.Armor = {
         }else{
           Game.Message.send("Sven can't use Armor");
         }
+      },
+      'hit_took': function(evtData){
+        return this.takeHit(evtData.damageAmount);
       }
 
     },
@@ -72,7 +75,22 @@ Game.ItemMixin.Armor = {
         this.attr._Armor_attr.currentHp -= amt;
         return 0;
       }
-      //destroy this
+      if(Game.messageCounters.armor == 1){
+        Game.Message.send("Sven wonders what you want him to do with this armor. Sven is already wearing it. What more do you want of Sven?");
+        Game.messageCounters.armor = 2;
+      }else if(Game.messageCounters.armor == 2){
+        Game.Message.send("Sven thinks armor is for wearing. Please enlighten Sven if you know something Sven doesn't");
+        Game.messageCounters.armor = 3;
+      }else if (Game.messageCounters.armor == 3){
+        Game.Message.send("Sven thinks you aren't that bright. Maybe next time Sven asks you to \"use\" your shirt");
+        Game.Message.send("What does that mean? Sven doesn't know and Sven doesn't care");
+        Game.messageCounters.armor = 4;
+      }else{
+        Game.Message.send("Sven can't use Armor");
+      }
+      Game.Message.send("Sven is saddened by the loss of his " + this.getName());
+      this.destroy();
+
       return amt - this.attr._Armor_attr.currentHp;
     }
   }
