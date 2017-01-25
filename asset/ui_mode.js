@@ -9,13 +9,31 @@ Game.UIMode.json_state_data = null;
 Game.UIMode.gameStart = {
   enter: function(){
     Game.refresh();
-    Game.RoomTileSets['mazeRoom'].getRoomInfo();
   },
   exit: function(){
   },
   render: function(display){
-    display.drawText(5,5,"Welcome");
-    display.drawText(5, 6, "press 'n' for a new game and 'l' to load an existing game");
+    display.drawText(1,1,"%c{#000}.%c{}  _______    __  ____ ____       ___ ___  ____  ___________   ___ ____        ");
+    display.drawText(1,2,"%c{#000}.%c{} / ___/  |__|  |/    |    \\     |   |   |/    |/ ___/      | /  _]    \\     ");
+    display.drawText(1,3,"%c{#000}.%c{}(   \\_|  |  |  |  o  |  o  )    | _   _ |  o  (   \\_|      |/  [_|  D  )    ");
+    display.drawText(1,4,"%c{#000}.%c{} \\__  |  |  |  |     |   _/     |  \\_/  |     |\\__  |_|  |_|    _]    /     ");
+    display.drawText(1,5,"%c{#000}.%c{} /  \\ |  `  '  |  _  |  |       |   |   |  _  |/  \\ | |  | |   [_|    \\     ");
+    display.drawText(1,6,"%c{#000}.%c{} \\    |\\      /|  |  |  |       |   |   |  |  |\\    | |  | |     |  .  \\    ");
+    display.drawText(1,7,"%c{#000}.%c{}  \\___| \\_/\\_/ |__|__|__|       |___|___|__|__| \\___| |__| |_____|__|\\_|     ");
+    display.drawText(15,9,"%c{#000}.%c{}     _______ __   ___ ____  ");
+    display.drawText(15,10,"%c{#000}.%c{}   / ___/  |  | /  _]    \\ ");
+    display.drawText(15,11,"%c{#000}.%c{}  (   \\_|  |  |/  [_|  _  |");
+    display.drawText(15,12,"%c{#000}.%c{}   \\__  |  |  |    _]  |  |");
+    display.drawText(15,13,"%c{#000}.%c{}   /  \\ |  :  |   [_|  |  |");
+    display.drawText(15,14,"%c{#000}.%c{}   \\    |\\   /|     |  |  |");
+    display.drawText(15,15,"%c{#000}.%c{}    \\___| \\_/ |_____|__|__|");
+
+
+
+
+
+
+    display.drawText(8, 20, "press 'n' for a new game and 'l' to load an existing game");
   },
   handleInput: function(inputType, inputData){
     if (inputType == 'keypress') {
@@ -101,7 +119,6 @@ Game.UIMode.gamePlay = {
   },
   render: function(display){
     var seenCells = this.getAvatar().getVisibleCells();
-    Game.Message.sendPreset("armor_use");
     this.getMap().renderOn(display,this.attr._cameraX,this.attr._cameraY,{
       visibleCells:seenCells,
       maskedCells:this.getAvatar().getRememberedCoordsForMap()
@@ -111,24 +128,23 @@ Game.UIMode.gamePlay = {
   renderAvatarInfo: function (display) {
     var fg = Game.UIMode.DEFAULT_COLOR_FG;
     var bg = Game.UIMode.DEFAULT_COLOR_BG;
-    display.drawText(1,2,"avatar x: "+this.getAvatar().getX(),fg,bg); // DEV
-    display.drawText(1,3,"avatar y: "+this.getAvatar().getY(),fg,bg); // DEV
-    display.drawText(1,4,"Turns: " + this.getAvatar().getTurns(),fg,bg);
-    display.drawText(1,5,"HP: " + this.getAvatar().getCurHp(),fg,bg);
+    display.drawText(1, 1,"Sven's Info", fg, bg);
+    display.drawText(1,2,"Attack: " + this.getAvatar().getAttackDamage(),fg,bg);
+    display.drawText(1,3,"HP: " + this.getAvatar().getCurHp(),fg,bg);
 
     //equippment stuff
     if(this.getAvatar().getEquippedWeapon()){
-      display.drawText(1,6, "Equipped Weapon: " + this.getAvatar().getEquippedWeapon().getName(),fg,bg);
+      display.drawText(1,4, "Equipped Weapon: " + this.getAvatar().getEquippedWeapon().getInfo(),fg,bg);
     }else{
-      display.drawText(1,6, "Equipped Weapon: ---",fg,bg);
+      display.drawText(1,4, "Equipped Weapon: ---",fg,bg);
     }
 
     var the_items = this.getAvatar().getItems();
     for(var i = 0; i<4; i++){
       if(the_items[i]){
-        display.drawText(1,7+i, "Item " + (i+1) + ": " + the_items[i].getName(),fg,bg);
+        display.drawText(1,5+i, "Item " + (i+1) + "[" + Game.getKey('item' + (i+1)) + "] : " + the_items[i].getInfo(),fg,bg);
       }else{
-        display.drawText(1,7+i, "Item " + (i+1) + ": ---",fg,bg);
+        display.drawText(1,5+i, "Item " + (i+1) + "[" + Game.getKey('item' + (i+1)) + "] : ---",fg,bg);
       }
     }
   },
@@ -181,7 +197,12 @@ Game.UIMode.gamePlay = {
   handleKey: function(inputData){
     var tookTurn = false;
     switch(inputData.key){
-      //tookTurn =
+      case Game.getKey("scroll_up"):
+      Game.Message.setDisplayedMessage(-1);
+      break;
+      case Game.getKey("scroll_down"):
+      Game.Message.setDisplayedMessage(1);
+      break;
       case Game.getKey("up"):
       tookTurn = this.handleDirectional(0, -1);
       break;
@@ -212,7 +233,7 @@ Game.UIMode.gamePlay = {
       case Game.getKey("options"):
       Game.switchUIMode(Game.UIMode.gameOptions);
       break;
-      case Game.getKey("swap"):
+      case Game.getKey("swap_initiate"):
       if(this.getCurrentRoom()){
         if(this.attr._inSwap){
           this.attr._inSwap = false;
@@ -241,13 +262,12 @@ Game.UIMode.gamePlay = {
 
           //improve on this
           this.attr._secondSwap_coords = this.getCurrentRoom().getGoodCoordinate();
-          console.dir(this.attr._secondSwap_coords);
 
           ///bugged
           this.getCurrentRoom().setSecondSelected(this.attr._secondSwap_coords.x, this.attr._secondSwap_coords.y);
         }
       }else{
-        console.log("not in_swap");
+        Game.Message.send("Sven thinks you can't confirm a swap without starting one");
       }
       break;
     }
@@ -256,6 +276,7 @@ Game.UIMode.gamePlay = {
 
     if (tookTurn) {
       this.getAvatar().raiseSymbolActiveEvent('actionDone');
+      Game.Message.ageMessages();
       return true;
     }
     return false;
@@ -286,27 +307,6 @@ Game.UIMode.gamePlay = {
 
     this.getMap().addEntity(this.getAvatar(),{x: 12, y: 5});
     this.setCameraToAvatar();
-    /*
-    ////////////////////////////////////////////////////
-    // dev code - just add some entities to the map
-    var itemPos = '';
-    for (var ecount = 0; ecount < 4; ecount++) {
-      // this.getMap().addEntity(Game.EntityGenerator.create('moss'),this.getMap().getRandomWalkableLocation());
-      // this.getMap().addEntity(Game.EntityGenerator.create('newt'),this.getMap().getRandomWalkableLocation());
-      // this.getMap().addEntity(Game.EntityGenerator.create('angry squirrel'),this.getMap().getRandomWalkableLocation());
-      this.getMap().addEntity(Game.EntityGenerator.create('attack slug'),this.getMap().getRandomWalkableLocation());
-
-      itemPos = this.getMap().getRandomWalkableLocation();
-      this.getMap().addItem(Game.ItemGenerator.create('rock'),itemPos);
-    }
-    this.getMap().addItem(Game.ItemGenerator.create('rock'),itemPos);
-    /*
-    // dev code - just add some entities to the map
-    for (var ecount = 0; ecount < 80; ecount++) {
-      this.getMap().addEntity(Game.EntityGenerator.create('moss'),this.getMap().getRandomWalkableLocation());
-    }
-    */
-
   },
 
   toJSON: function() {
@@ -324,29 +324,56 @@ Game.UIMode.gameWin = {
     exit: function(){
     },
     render: function(display){
-      display.drawText(5,5,"You Win");
+      display.drawText(10,7,"%c{#000}.%c{} __ __  ___  __ __      __    __ ____ ____  ");
+      display.drawText(10,8,"%c{#000}.%c{}|  |  |/   \\|  |  |    |  |__|  |    |    \\ ");
+      display.drawText(10,10,"%c{#000}.%c{}|  |  |     |  |  |    |  |  |  ||  ||  _  |");
+      display.drawText(10,11,"%c{#000}.%c{}|  ~  |  O  |  |  |    |  |  |  ||  ||  |  |");
+      display.drawText(10,12,"%c{#000}.%c{}|___, |     |  :  |    |  `  '  ||  ||  |  |");
+      display.drawText(10,13,"%c{#000}.%c{}|     |     |     |     \\      / |  ||  |  |");
+      display.drawText(10,14,"%c{#000}.%c{}|____/ \\___/ \\__,_|      \\_/\\_/ |____|__|__|");
+      display.drawText(10, 20, "press 'n' for a new game and 'l' to load an existing game");
     },
     handleInput: function(inputType, inputData){
+      if (inputType == 'keypress') {
+        if (inputData.key == 'n') {
+          Game.UIMode.gameSave.newGame();
+        }
+        else if (inputData.key == 'l') {
+          Game.UIMode.gameSave.restoreGame();
+        }
+      }
     }
 },
 
 Game.UIMode.gameLose = {
     enter: function(){
       Game.TimeEngine.lock();
-      console.log("entered lose mode");
       Game.Message.clear();
       Game.refresh();
     },
     exit: function(){
-      console.log("exiting lose mode");
     },
     render: function(display){
-      console.log("rendered lose mode");
-      display.drawText(5,5,"gamelose mode");
+      display.clear();
+      display.drawText(10,7,"%c{#000}.%c{}  ____  ____ ___ ___   ___       ___  __ __   ___ ____  __ ");
+      display.drawText(10,8,"%c{#000}.%c{} /    |/    |   |   | /  _]     /   \\|  |  | /  _]    \\|  |");
+      display.drawText(10,9,"%c{#000}.%c{}|   __|  o  | _   _ |/  [_     |     |  |  |/  [_|  D  )  |");
+      display.drawText(10,10,"%c{#000}.%c{}|  |  |     |  \\_/  |    _]    |  O  |  |  |    _]    /|__|");
+      display.drawText(10,11,"%c{#000}.%c{}|  |_ |  _  |   |   |   [_     |     |  :  |   [_|    \\ __ ");
+      display.drawText(10,12,"%c{#000}.%c{}|     |  |  |   |   |     |    |     |\\   /|     |  .  \\  |");
+      display.drawText(10,13,"%c{#000}.%c{}|___,_|__|__|___|___|_____|     \\___/  \\_/ |_____|__|\\_|__|");
+      display.drawText(10, 20, "press 'n' for a new game and 'l' to load an existing game");
     },
     handleInput: function(inputType, inputData){
-      console.log("handling input in game lose");
       Game.Message.clear();
+      if (inputType == 'keypress') {
+        if (inputData.key == 'n') {
+          Game.UIMode.gameSave.newGame();
+        }
+        else if (inputData.key == 'l') {
+          Game.UIMode.gameSave.restoreGame();
+        }
+      }
     }
 },
 
@@ -524,7 +551,10 @@ Game.UIMode.gameOptions = {
 //update this later
     Game.getDisplay('main').clear(); //this could probably be handled more nicely
 
-    display.drawText(1,1,"Key Bindings (use tab to scroll)");
+    display.drawText(5,1, "Help (use [x] to exit)")
+
+
+    display.drawText(37,1,"Change Key Bindings (use [z] to scroll)");
 
     var key = null;
     var kb = Game.keyBinding.attr._curKeys;
@@ -532,12 +562,12 @@ Game.UIMode.gameOptions = {
       key=Game.keyBinding.attr._curKeys[i].label;
       if(key != kb[this.selected_function].label){
         if(kb[i].keyUsed == ' '){
-          display.drawText(1,2+i,kb[i].label+": space");
+          display.drawText(37,3+i,kb[i].label+": space");
         }else{
-          display.drawText(1,2+i,kb[i].label+": "+kb[i].keyUsed);
+          display.drawText(37,3+i,kb[i].label+": "+kb[i].keyUsed);
         }
       }else{
-        display.drawText(1,2+i,"%b{blue}"+kb[i].label+": "+kb[i].keyUsed);
+        display.drawText(37,3+i,"%b{blue}"+kb[i].label+": "+kb[i].keyUsed);
       }
     }
   },

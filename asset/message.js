@@ -1,42 +1,62 @@
 Game.Message = {
   attr: {
-    _curMessages: [],
-    _messageNum: 0
+    freshMessagesReverseQueue: [],
+    staleMessagesQueue: [],
+    archivedMessagesQueue: [],
+    archiveMessageLimit: 200
   },
-
-
-  presets: {
-    armor_use: {cur: 0, max: Game.PresetMessages.armor_use.length,lines: Game.PresetMessages.armor_use},
-    armor_loss: {cur: 0, max: Game.PresetMessages.armor_loss.length, lines: Game.PresetMessages.armor_loss}
-  },
-
   render: function (display) {
+    // console.log('render messages');
+    //console.dir(this.attr);
     display.clear();
-    if(this.attr._curMessages.length != 0){
-      display.drawText(1,1,
-        this.attr._curMessages.slice(this.attr._messageNum, this.attr._messageNum+Game.display.message.h).join("\n"),
-        '#fff','#000');
+    var dispRowMax = display._options.height - 1;
+    var dispColMax = display._options.width - 2;
+    var dispRow = 0;
+    var freshMsgIdx = 0;
+    var staleMsgIdx = 0;
+    // fresh messages in white
+    for (freshMsgIdx = 0; freshMsgIdx < this.attr.freshMessagesReverseQueue.length && dispRow < dispRowMax; freshMsgIdx++) {
+      dispRow += display.drawText(1,dispRow,'%c{#fff}%b{#000}'+this.attr.freshMessagesReverseQueue[freshMsgIdx]+'%c{}%b{}',79);
+    }
+    // stale messages in grey
+    for (staleMsgIdx = 0; staleMsgIdx < this.attr.staleMessagesQueue.length && dispRow < dispRowMax; staleMsgIdx++) {
+      dispRow += display.drawText(1,dispRow,'%c{#aaa}%b{#000}'+this.attr.staleMessagesQueue[staleMsgIdx]+'%c{}%b{}',79);
     }
   },
-  //can't handle a hash of messages
+  ageMessages:function (lastStaleMessageIdx) {
+    // console.log('age messages');
+    // always archive the oldest stale message
+    if (this.attr.staleMessagesQueue.length > 0) {
+      this.attr.archivedMessagesQueue.unshift(this.attr.staleMessagesQueue.pop());
+    }
+    // archive any additional stale messages that didn't get shown
+    while (this.attr.staleMessagesQueue.length > lastStaleMessageIdx) {
+      this.attr.archivedMessagesQueue.unshift(this.attr.staleMessagesQueue.pop());
+    }
+    // just dump messages that are too old for the archive
+    while (this.attr.staleMessagesQueue.length > this.attr.archiveMessageLimit) {
+      this.attr.archivedMessagesQueue.pop();
+    }
+    // move fresh messages to stale messages
+    while (this.attr.freshMessagesReverseQueue.length > 0) {
+      this.attr.staleMessagesQueue.unshift(this.attr.freshMessagesReverseQueue.shift());
+    }
+  },
   send: function (msg) {
-    this.attr._curMessages.push(msg);
+    // console.log('send message '+msg);
+    this.attr.freshMessagesReverseQueue.push(msg); // new messages get added to the end of the fresh message queue so that sequential things are in the right order (e.g. you hit the goblin, you kill the goblin)
   },
   clear: function () {
-    this.attr._curMessages = [];
+    this.attr.freshMessagesReverseQueue = [];
+    this.attr.staleMessagesQueue = [];
   },
-  setDisplayedMessage: function(newNum){
-    this.attr._messageNum = newNum;
+  getArchives: function () {
+    return this.attr.archivedMessagesQueue;
   },
-  sendPreset: function(type){
-    console.log("presets");
-    console.dir(this.presets);
-    console.log("type");
-    console.dir(this.presets[type]);
-    var num = this.presets[type].cur;
-    if(num != this.presets[type].max){
-      this.presets[type] = num + 1;
-    }
+  getArchiveMessageLimit: function () {
+    return this.attr.archiveMessageLimit;
   },
-
+  setArchiveMessageLimit: function (n) {
+    this.attr.archiveMessageLimit = n;
+  }
 };

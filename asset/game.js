@@ -32,7 +32,7 @@ window.onload = function(){
 var Game = {
   _PERSISTANCE_NAMESPACE: 'wsrlgame',
   _randomSeed: 0,
-  _DISPLAY_SPACING: 1.4,
+  _DISPLAY_SPACING: 1.1,
   _curUIMode: null,
   game: null,
   TRANSIENT_RNG: null,
@@ -53,13 +53,13 @@ var Game = {
       o: null
     },
     avatar: {
-      w: 20,
-      h: 24,
+      w: 40,
+      h: 10,
       o: null
     },
     message: {
-      w: 100,
-      h: 5,
+      w: 39,
+      h: 10,
       o: null
     }
   },

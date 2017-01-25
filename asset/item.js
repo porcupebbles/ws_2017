@@ -13,7 +13,29 @@ Game.Item = function(template) {
 Game.Item.extend(Game.SymbolActive);
 
 //this doesn't provide a way to remove items on the map
-Game.Item.destroy = function(){
+Game.Item.prototype.destroy = function(){
   Game.getAvatar().removeItem(this); //this will be a sticking point if there are ever other entities with inventories
   Game.DATASTORE.ITEM[this.getId()] = undefined;
 };
+
+Game.Item.prototype.getInfo = function(){
+  var theInfo = this.getName();
+  if(this.hasMixin('Armor')){
+    theInfo = theInfo + " (" +this.getCurrentHp() + "/" + this.getMaxHp()+")";
+  }else if(this.hasMixin('MeleeAttack')){
+    theInfo = theInfo + " ("+this.getDamage()+", "+this.getDurability()+")";
+  }
+  return theInfo;
+};
+
+Game.Item.prototype.toJSON = function () {
+  var json = Game.UIMode.gameSave.BASE_toJSON.call(this);
+  return json;
+};
+Game.Item.prototype.fromJSON = function (json) {
+  Game.UIMode.gameSave.BASE_fromJSON.call(this,json);
+};
+
+Game.Item.DEFAULT_COLOR_Weapon = '#ff1a1a';
+Game.Item.DEFAULT_COLOR_Armor = '#1a75ff';
+Game.Item.DEFAULT_COLOR_Misc = '#9900cc';

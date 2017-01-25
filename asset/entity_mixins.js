@@ -35,7 +35,7 @@ Game.EntityMixin.PlayerMessager = {
       },
       'killed': function(evtData) {
         Game.Message.send('Sven was killed by the '+evtData.killedBy.getName());
-        Game.renderDisplayMessage();
+        Game.renderMessage();
         //Game.Message.ageMessages();
       }
     }
@@ -75,7 +75,7 @@ Game.EntityMixin.PlayerActor = {
       },
       'killed': function(evtData) {
         //Game.TimeEngine.lock();
-        Game.switchUIMode("gameLose");
+        Game.switchUIMode(Game.UIMode.gameLose);
       }
     }
   },
@@ -236,6 +236,11 @@ Game.EntityMixin.HitPoints = {
       'attacked': function(evtData) {
         // console.log('HitPoints attacked');
         var unAbsorbedDamage = this.raiseSymbolActiveEvent('hurt', {damageAmount: evtData.attackDamage});
+        if(unAbsorbedDamage.hasOwnProperty('inventory')){
+          unAbsorbedDamage = unAbsorbedDamage.inventory[0];
+        }else{
+          unAbsorbedDamage = evtData.attackDamage;
+        }
 
         this.takeHits(unAbsorbedDamage);
         this.raiseSymbolActiveEvent('damagedBy',{damager:evtData.attacker,damageAmount:evtData.attackDamage});
@@ -288,20 +293,12 @@ Game.EntityMixin.MeleeAttacker = {
     listeners: {
       'bumpEntity': function(evtData) {
         // console.log('MeleeAttacker bumpEntity');
-        var hitValResp = this.raiseSymbolActiveEvent('calcAttackHit');
-        var avoidValResp = evtData.recipient.raiseSymbolActiveEvent('calcAttackAvoid');
-        // Game.util.cdebug(avoidValResp);
-        var hitVal = Game.util.compactNumberArray_add(hitValResp.attackHit);
-        var avoidVal = Game.util.compactNumberArray_add(avoidValResp.attackAvoid);
-        if (ROT.RNG.getUniform()*(hitVal+avoidVal) > avoidVal) {
+
           var hitDamageResp = this.raiseSymbolActiveEvent('calcAttackDamage');
           var damageMitigateResp = evtData.recipient.raiseSymbolActiveEvent('calcDamageMitigation');
 
           evtData.recipient.raiseSymbolActiveEvent('attacked',{attacker:evtData.actor,attackDamage:Game.util.compactNumberArray_add(hitDamageResp.attackDamage) - Game.util.compactNumberArray_add(damageMitigateResp.damageMitigation)});
-        } else {
-          evtData.recipient.raiseSymbolActiveEvent('attackAvoided',{attacker:evtData.actor,recipient:evtData.recipient});
-          evtData.actor.raiseSymbolActiveEvent('attackMissed',{attacker:evtData.actor,recipient:evtData.recipient});
-        }
+
         this.setCurrentActionDuration(this.attr._MeleeAttacker_attr.attackActionDuration);
       },
       'calcAttackHit': function(evtData) {
@@ -310,7 +307,7 @@ Game.EntityMixin.MeleeAttacker = {
       },
       'calcAttackDamage': function(evtData) {
         // console.log('MeleeAttacker bumpEntity');
-        return {attackDamage:this.getAttackDamage()};
+        return {attackDamage:this.makeAttack()};
       }
 
     }
@@ -318,8 +315,23 @@ Game.EntityMixin.MeleeAttacker = {
   getAttackHit: function () {
     return this.attr._MeleeAttacker_attr.attackHit;
   },
+  makeAttack: function (){
+    var attack = this.raiseSymbolActiveEvent('make_attack').inventory;
+    if(attack != undefined){
+      attack = attack[0];
+    }else{
+      attack = 0;
+    }
+    return this.attr._MeleeAttacker_attr.attackDamage + attack;
+  },
   getAttackDamage: function () {
-    return this.attr._MeleeAttacker_attr.attackDamage;
+    var attack = this.raiseSymbolActiveEvent('get_attack').inventory;
+    if(attack != undefined){
+      attack = attack[0];
+    }else{
+      attack = 0;
+    }
+    return this.attr._MeleeAttacker_attr.attackDamage + attack;
   }
 };
 
@@ -351,7 +363,7 @@ Game.EntityMixin.MeleeDefender = {
     return this.attr._MeleeDefenderr_attr.attackAvoid;
   },
   getDamageMitigation: function () {
-    return this.attr._MeleeDefenderr_attr.damageMitigation;
+    return 0;
   }
 };
 
@@ -705,17 +717,32 @@ Game.EntityMixin.Inventory = {
         var curDamage = evtData.damageAmount;
         for(var i = 0; i < this.getItems().length; i++){
           if(curDamage != 0 && this.getItems()[i]){
-            curDamage = this.getItems()[i].raiseSymbolActiveEvent('hit_took', {damageAmount: curDamage});
+            var armorResponse = this.getItems()[i].raiseSymbolActiveEvent('hit_took', {damageAmount: curDamage});
+            if(armorResponse.hasOwnProperty('damageLeft')){
+              curDamage = armorResponse.damageLeft[0];;
+            }
           }
         }
-        return curDamage;
+        return {inventory: curDamage};
+      },
+      'get_attack': function(evtData){
+        if(this.getEquippedWeapon()){
+          return {inventory:this.getEquippedWeapon().getDamage()};
+        }
+        return {inventory:0};
+      },
+      'make_attack': function(evtData){
+        if(this.getEquippedWeapon()){
+          return {inventory:this.getEquippedWeapon().raiseSymbolActiveEvent('prepare_attack').weaponAttack[0]};
+        }
+        return {inventory:0};
       }
     }
   },
 
   equipWeapon: function(toEquip){
-    var oldWeapon = this.attr._Inventory_attr.equipWeapon;
-    this.attr._Inventory_attr.equipWeapon = toEquip;
+    var oldWeapon = this.attr._Inventory_attr.equippedWeapon;
+    this.attr._Inventory_attr.equippedWeapon = toEquip;
     return oldWeapon;
   },
   getItems: function(){
@@ -726,16 +753,18 @@ Game.EntityMixin.Inventory = {
   },
   useItem: function(idx){
     if(this.getItems()[idx]){
+      console.dir(this.getItems()[idx]);
       //bad practive should clean up at some point
       if(this.getItems()[idx].hasMixin('MeleeAttack')){
         var oldWeapon = this.equipWeapon(this.getItems()[idx]);
+        console.dir(oldWeapon);
         if(oldWeapon){
           this.getItems()[idx] = oldWeapon;
         }else{
           this.getItems().splice(idx, 1);
         }
       }
-      this.getItems()[idx].raiseSymbolActiveEvent('used');//gotta flesh this out
+      //this.getItems()[idx].raiseSymbolActiveEvent('used');//gotta flesh this out
     }else{
       Game.Message.send("Sven thinks that slot is empty");
     }
@@ -773,10 +802,16 @@ Game.EntityMixin.Inventory = {
     }
     return null;
   },
-  getWeaponAttack: function(){
-    // if(this.attr._Inventory_attr.equippedWeapon){
-    //   return this.attr._Inventory_attr.equippedWeapon;
-    // }
-    // return this.attr._Inventory_attr.equippedWeapon;
+  getInfo: function(idx){
+    var item = this.getItems()[idx];
+    if(item){
+      if(item.hasMixin('armor')){
+        return item.getName() + " (" +item.getCurrentHp + "/" + item.getMaxHp()+")";
+      }else if(item.hasMixin('MeleeAttack')){
+        return item.getName() + " (dura: "+item.getDurability()+" dama: "+item.getDamage();
+      }
+      return item.getName();;
+    }
+    return "";
   }
 };

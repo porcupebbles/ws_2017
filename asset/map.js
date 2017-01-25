@@ -28,13 +28,14 @@ Game.Map = function (mapTileSetName, presetId) {
         this.addEntity(Game.EntityGenerator.create(creatures[i].name), {x:creatures[i].pos.x+room_pos.x, y: creatures[i].pos.y+room_pos.y});
       }
     }
+
     var items = this.attr._rooms[i].getItems();
     for(var j = 0; j < items.length; j++){
-      if(!items[i].pos){
+      if(!items[j].pos){
         var rand_pos_room = this.attr._rooms[i].getRandomWalkableLocation();
-        this.addItem(Game.ItemGenerator.create(items[i].name), {x: room_pos.x+rand_pos_room.x, y: room_pos.y+rand_pos_room.y});
+        this.addItem(Game.ItemGenerator.create(items[j].name), {x: room_pos.x+rand_pos_room.x, y: room_pos.y+rand_pos_room.y});
       }else{
-        this.addItem(Game.ItemGenerator.create(items[i].name), {x:items[i].pos.x+room_pos.x, y: items[i].pos.y+room_pos.y});
+        this.addItem(Game.ItemGenerator.create(items[j].name), {x:items[j].pos.x+room_pos.x, y: items[j].pos.y+room_pos.y});
       }
     }
   }

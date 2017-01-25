@@ -287,6 +287,18 @@ Game.Room.prototype.coordsUsed = function(x, y){
   }
 };
 
+Game.Room.prototype.getTile = function (x_or_pos,y) {
+  var useX = x_or_pos,useY=y;
+  if (typeof x_or_pos == 'object') {
+    useX = x_or_pos.x;
+    useY = x_or_pos.y;
+  }
+  if ((useX < 0) || (useX >= this.attr._width) || (useY<0) || (useY >= this.attr._height)) {
+    return Game.Tile.nullTile;
+  }
+  return this.attr._tiles[useX][useY] || Game.Tile.nullTile;
+};
+
 Game.Room.prototype.getRandomLocation = function(filter_func){
   if (filter_func === undefined) {
     filter_func = function(tile) { return true; };
@@ -295,7 +307,7 @@ Game.Room.prototype.getRandomLocation = function(filter_func){
   do {
     tX = Game.util.randomInt(0,this.attr._width - 1);
     tY = Game.util.randomInt(0,this.attr._height - 1);
-    t = this.attr._map.getTile(tX,tY);
+    t = this.getTile(tX,tY);
   } while (! filter_func(t));
   return {x:tX,y:tY};
 };

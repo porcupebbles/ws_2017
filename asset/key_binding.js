@@ -11,7 +11,7 @@ Game.keyBinding = {
       {label: 'scroll_down', keyUsed: 'k'},
       {label: 'save_screen', keyUsed: 't'},
       {label: 'options', keyUsed: 'q'},
-      {label: 'swap', keyUsed: ' '},
+      {label: 'swap_initiate', keyUsed: ' '},
       {label: 'swap_confirm', keyUsed: 'v'},
       {label: 'item1', keyUsed: '1'},
       {label: 'item2', keyUsed: '2'},

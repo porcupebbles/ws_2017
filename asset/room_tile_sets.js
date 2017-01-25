@@ -29,19 +29,26 @@ Game.RoomTileSets = {
             }else if(i >= this._width/2 && j >= (this._height/2)){
               roomTiles[i][j] = new Game.Tile({name:'floor', chr:' ', walkable:true, transparent: true});
             }else{
-              roomTiles[i][j] = new Game.Tile({name: 'roomWall', chr:'#', room: true, fg: '#605db1', transparent: true});
+              roomTiles[i][j] = new Game.Tile({name: 'roomWall', chr:'#', room: true, fg: '#5c8a8a', transparent: true});
             }
           }
+        }
+
+        var creatures = [];
+        for(var i = 0; i < 10; i++){
+          creatures.push({name: 'cave wyrm'});
         }
 
         var theitems = [];
         for(var i = 0; i <5; i++){
           theitems.push({name:'rock'});
+          theitems.push({name: 'rusty dagger'});
+          theitems.push({name: 'leather cuirass'});
         }
 
         //the 2-d array here will get more complex
         return {block_dim: blocdim, tiles: roomTiles,
-        width: this._width, height: this._height, items: theitems};
+        width: this._width, height: this._height, items: theitems, enemies: creatures};
       }
     },
     TutorialRoom3: {
@@ -88,7 +95,7 @@ Game.RoomTileSets = {
         var map = new ROT.Map.EllerMaze(fullTiles.length, fullTiles[0].length);
         map.create(function(x,y,v) {
           if (v === 1) {
-            fullTiles[x][y] = new Game.Tile({name: 'roomWall', chr:'#', room: true, fg: '#605db1', transparent: true});
+            fullTiles[x][y] = new Game.Tile({name: 'roomWall', chr:'#', room: true, fg: '#5c8a8a', transparent: true});
           } else {
             fullTiles[x][y] = new Game.Tile({name:'floor', chr:' ', walkable:true, transparent: true});
           }

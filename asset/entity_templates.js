@@ -2,12 +2,12 @@ Game.EntityGenerator = new Game.Generator('entities',Game.Entity);
 
 Game.EntityGenerator.learn({
   name: 'avatar',
-  chr:'@',
+  chr:'S',
   fg:'#dda',
   sightRadius: 100,//maybe issues here
   maxHp: 10,
   attackAvoid: 1,
-  attackDamage: 2,
+  attackDamage: 3,
   swappable: false, //not working
   mixins: ["PlayerActor", "PlayerMessager", "WalkerCorporeal", "Sight", "MapMemory", "HitPoints", "Chronicle", "MeleeAttacker", "MeleeDefender", "Inventory"]
 });
