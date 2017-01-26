@@ -1,6 +1,6 @@
 Game.UIMode = {};
-Game.UIMode.DEFAULT_COLOR_FG = '#fff';
-Game.UIMode.DEFAULT_COLOR_BG = '#000';
+Game.UIMode.DEFAULT_COLOR_FG = '#006600';//'#fff';
+Game.UIMode.DEFAULT_COLOR_BG = '#140d06'; //'#000';
 Game.UIMode.DEFAULT_COLOR_STR = '%c{'+Game.UIMode.DEFAULT_COLOR_FG+'}%b{'+Game.UIMode.DEFAULT_COLOR_BG+'}';
 
 //used to hold all the save states
@@ -20,7 +20,7 @@ Game.UIMode.gameStart = {
     display.drawText(1,5,"%c{#000}.%c{} /  \\ |  `  '  |  _  |  |       |   |   |  _  |/  \\ | |  | |   [_|    \\     ");
     display.drawText(1,6,"%c{#000}.%c{} \\    |\\      /|  |  |  |       |   |   |  |  |\\    | |  | |     |  .  \\    ");
     display.drawText(1,7,"%c{#000}.%c{}  \\___| \\_/\\_/ |__|__|__|       |___|___|__|__| \\___| |__| |_____|__|\\_|     ");
-    display.drawText(15,9,"%c{#000}.%c{}     _______ __   ___ ____  ");
+    display.drawText(15,9,"%c{#000}.%c{}    _______ __   ___ ____  ");
     display.drawText(15,10,"%c{#000}.%c{}   / ___/  |  | /  _]    \\ ");
     display.drawText(15,11,"%c{#000}.%c{}  (   \\_|  |  |/  [_|  _  |");
     display.drawText(15,12,"%c{#000}.%c{}   \\__  |  |  |    _]  |  |");
@@ -34,6 +34,7 @@ Game.UIMode.gameStart = {
 
 
     display.drawText(8, 20, "press 'n' for a new game and 'l' to load an existing game");
+    display.drawText(8, 21, "press ["+Game.getKey("help/options") + "] in-game for help and options");
   },
   handleInput: function(inputType, inputData){
     if (inputType == 'keypress') {
@@ -197,11 +198,28 @@ Game.UIMode.gamePlay = {
   handleKey: function(inputData){
     var tookTurn = false;
     switch(inputData.key){
-      case Game.getKey("scroll_up"):
-      Game.Message.setDisplayedMessage(-1);
+      // case Game.getKey("scroll_up"):
+      // Game.Message.setDisplayedMessage(-1);
+      // break;
+      // case Game.getKey("scroll_down"):
+      // Game.Message.setDisplayedMessage(1);
+      // break;
+      case Game.getKey("down_right"):
+      tookTurn = this.handleDirectional(1, 1);
       break;
-      case Game.getKey("scroll_down"):
-      Game.Message.setDisplayedMessage(1);
+      case Game.getKey("down_left"):
+      tookTurn = this.handleDirectional(-1, 1);
+      break;
+      case Game.getKey("up_right"):
+      tookTurn = this.handleDirectional(1, -1);
+      break;
+      case Game.getKey("up_left"):
+      tookTurn = this.handleDirectional(-1, -1);
+      break;
+      case Game.getKey("wait"):
+      if(!this.attr._inSwap){
+        tookTurn = true;
+      }
       break;
       case Game.getKey("up"):
       tookTurn = this.handleDirectional(0, -1);
@@ -230,7 +248,7 @@ Game.UIMode.gamePlay = {
       case Game.getKey("save_screen"):
       Game.switchUIMode(Game.UIMode.gameSave);
       break;
-      case Game.getKey("options"):
+      case Game.getKey("help/options"):
       Game.switchUIMode(Game.UIMode.gameOptions);
       break;
       case Game.getKey("swap_initiate"):
@@ -240,7 +258,6 @@ Game.UIMode.gamePlay = {
           this.getCurrentRoom().clearSelected();
           this.attr._inSecondSwap = false;
         }else{
-          console.log("now in swap");
           this.getAvatar().setSwappable(false);
           this.attr._inSwap = true;
           this.attr._firstSwap_coords = this.getCurrentRoom().getGoodCoordinate();
@@ -296,6 +313,14 @@ Game.UIMode.gamePlay = {
       return false;
     }else{
       this.moveAvatar(dx,dy);
+
+      //this is gross change if game is expanded upon
+      var curRoom = this.getCurrentRoom();
+      if(curRoom && !curRoom.isVisited()){
+        curRoom.setVisited(true);
+        Game.Message.send(Game.Room_Messages[0]);
+        Game.Room_Messages.splice(0, 1);
+      }
       return true;
     }
   },
@@ -305,7 +330,8 @@ Game.UIMode.gamePlay = {
 
     this.setAvatar(Game.EntityGenerator.create('avatar'));
 
-    this.getMap().addEntity(this.getAvatar(),{x: 12, y: 5});
+    this.getMap().addEntity(this.getAvatar(),{x: 4, y: 4});
+    this.getMap().addEntity(Game.EntityGenerator.create('Cellar Troll'), {x:8, y:8});
     this.setCameraToAvatar();
   },
 
@@ -551,10 +577,14 @@ Game.UIMode.gameOptions = {
 //update this later
     Game.getDisplay('main').clear(); //this could probably be handled more nicely
 
-    display.drawText(5,1, "Help (use [x] to exit)")
+    display.drawText(5,1, "Help (use [l] to exit)")
 
 
-    display.drawText(37,1,"Change Key Bindings (use [z] to scroll)");
+
+    display.drawText(5, 3, "A swap starts/stops by pressing your swap_initiate key. Pressing swap_confirm will give you a second block or confirm your swap. Be careful, Sven and some enemies cannot be swapped\n\nWeapons are %c{#b3ffb3}this color%c{} and must be equipped to use \n\n Armor is %c{#00664d}this color%c{} and is used passively \n\n Special Items are %c{#00e64d}this color%c{} and must be used to have an effect \n\n", 24);
+
+
+    display.drawText(37,1,"Change Key Bindings (use [p] to scroll)");
 
     var key = null;
     var kb = Game.keyBinding.attr._curKeys;
@@ -572,17 +602,18 @@ Game.UIMode.gameOptions = {
     }
   },
   handleInput: function(inputType, inputData){
+    console.dir(inputData);
     var kb = Game.keyBinding.attr._curKeys;
     if (inputType == 'keypress') {
       //this would also be the place to exclude any other keys that shouldn't be
       //modified
-      if(inputData.key == 'z'){
+      if(inputData.key == 'p'){
         if(this.selected_function+1 < kb.length){
           this.selected_function++;
         }else{
           this.selected_function=0;
         }
-      }else if(inputData.key == 'x'){
+      }else if(inputData.key == 'l'){
         Game.switchUIMode(Game.UIMode.gamePlay);
 
       }else{

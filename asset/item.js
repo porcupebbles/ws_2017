@@ -18,12 +18,15 @@ Game.Item.prototype.destroy = function(){
   Game.DATASTORE.ITEM[this.getId()] = undefined;
 };
 
+//ugly ugly code shame on me
 Game.Item.prototype.getInfo = function(){
   var theInfo = this.getName();
   if(this.hasMixin('Armor')){
     theInfo = theInfo + " (" +this.getCurrentHp() + "/" + this.getMaxHp()+")";
   }else if(this.hasMixin('MeleeAttack')){
     theInfo = theInfo + " ("+this.getDamage()+", "+this.getDurability()+")";
+  }else if(this.hasMixin('Healing')){
+    theInfo = theInfo + " (heals "+this.getHealingAmount() + ")";
   }
   return theInfo;
 };
@@ -36,6 +39,6 @@ Game.Item.prototype.fromJSON = function (json) {
   Game.UIMode.gameSave.BASE_fromJSON.call(this,json);
 };
 
-Game.Item.DEFAULT_COLOR_Weapon = '#ff1a1a';
-Game.Item.DEFAULT_COLOR_Armor = '#1a75ff';
-Game.Item.DEFAULT_COLOR_Misc = '#9900cc';
+Game.Item.DEFAULT_COLOR_Weapon = '#b3ffb3';
+Game.Item.DEFAULT_COLOR_Armor = '#00664d';
+Game.Item.DEFAULT_COLOR_Misc = '#00e64d';

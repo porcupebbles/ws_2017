@@ -155,6 +155,9 @@ var Game = {
   getAvatar: function () {
     return Game.UIMode.gamePlay.getAvatar();
   },
+  getMap: function(){
+    return Game.UIMode.gamePlay.getMap();
+  },
 
   switchUIMode: function(newMode){
     //handle exit from old mode
@@ -169,6 +172,20 @@ var Game = {
     }
     //render everything
     this.renderAll();
-  }
+  },
+
+  Room_Messages: ["Sven should have never should have gone exploring his basement...\nIf you help Sven escape, Sven would be most greatfull.\nSven can move horizontally and diagonally using your directional keys",
+
+  "Sven, using the space key, can swap groups of tiles in a room and a swap can be cancelled the same way. Pressing shift will confirm the swap",
+
+  "Some rooms have different magic fields and Sven will be able to move different amounts of blocks. I guess he isn't much of a master yet...",
+
+  "There are some nasty monsters down in Sven's basement especially when you have wet-noodle arms like Sven. It's best to avoid confrontation or find weapons and armor",
+
+  "Here's a real room. Sven hopes you get it cause it's his butt on the line",
+
+  "Sven's heart is beating out of his chest. Sven can't wait to get out of this basement",
+
+  "Sven thinks we're almost to the staircase. As long as there aren't tougher enemies, Sven thinks this will be easy"]
 
 };

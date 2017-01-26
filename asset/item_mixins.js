@@ -88,7 +88,7 @@ Game.ItemMixin.Armor = {
     if(Game.messageCounters.armor_loss < 5){
       Game.Message.send("Sven is saddened by the loss of his " + this.getName());
       Game.messageCounters.armor_loss = Game.messageCounters+1;
-    }else
+    }else{
       Game.Message.send("Sven's " + this.getName()+ " broke. He's kind of over it.");
     }
 
@@ -97,4 +97,119 @@ Game.ItemMixin.Armor = {
     return amt - this.attr._Armor_attr.currentHp;
   }
 
-}
+};
+Game.ItemMixin.MeleeAttack = {
+  META: {
+    mixinName: 'MeleeAttack',
+    mixinGroup: 'CombatItems',
+    listeners: {
+      'prepare_attack': function(evtData){
+        this.setDurability(Game.util.calcBreak(this.getDurability()));
+        if(this.getDurability() == 0){
+          this.destroy();
+          Game.Message.send("Sven's trusty "+this.getName() + " has broken");
+        }
+        return {weaponAttack:this.attr._MeleeAttack_attr.Damage};
+      }
+
+    },
+    stateNamespace: '_MeleeAttack_attr',
+    stateModel: {
+      Damage: 1,
+      Durability: 1
+    },
+    init: function (template) {
+      this.attr._MeleeAttack_attr.Damage = template.Damage || 1;
+      this.attr._MeleeAttack_attr.Durability = template.Durability || 1;
+    }
+  },
+  getDamage: function(){
+    return this.attr._MeleeAttack_attr.Damage;
+  },
+  setDamage: function(new_dam){
+    this.attr._MeleeAttack_attr.Damage = new_dam;
+  },
+  getDurability: function(){
+    return this.attr._MeleeAttack_attr.Durability;
+  },
+  setDurability: function(new_dur){
+    this.attr._MeleeAttack_attr.Durability = new_dur;
+  }
+},
+
+Game.ItemMixin.Healing = {
+  META: {
+    mixinName: 'Healing',
+    mixinGroup: 'UseItems',
+    listeners: {
+      'used': function(evtData){
+          Game.Message.send("Sven feels the power of the " + this.getName()+ " rush through him. he is rejuvenated");
+          return {healing: this.heal()};
+      },
+
+
+    },
+    stateNamespace: '_Healing_attr',
+    stateModel: {
+      healingAmount: 1
+    },
+    init: function (template) {
+      this.attr._Healing_attr.healingAmount = template.healingAmount || 1;
+    }
+  },
+  heal: function(){
+    var healing = this.attr._Healing_attr.healingAmount;
+    this.destroy();
+    return healing;
+  },
+  getHealingAmount: function(){
+    return this.attr._Healing_attr.healingAmount;
+  }
+
+};
+Game.ItemMixin.Teleporting = {
+  META: {
+    mixinName: 'Teleporting',
+    mixinGroup: 'UseItems',
+    listeners: {
+      'used': function(evtData){
+        if(Game.UIMode.gamePlay.getCurrentRoom()){
+          Game.Message.send("Sven is a little disoriented");
+          var current = Game.UIMode.gamePlay.getCurrentRoom();
+          Game.getAvatar().setPos({x:current.getRandomWalkableLocation().x+current.getPos().x, y:current.getRandomWalkableLocation().y+current.getPos().y});
+          Game.UIMode.gamePlay.setCameraToAvatar();
+          Game.getMap().updateEntityLocation(Game.getAvatar());
+          this.destroy();
+        }else{
+          Game.Message.send("Sven can't teleport in hallways. It could be dangerous");
+        }
+      },
+
+
+    },
+    stateNamespace: '_Teleporting_attr',
+    stateModel: {
+    },
+    init: function (template) {
+    }
+  }
+};
+Game.ItemMixin.Useless = {
+  META: {
+    mixinName: 'Useless',
+    mixinGroup: 'Useless',
+    listeners: {
+      'used': function(evtData){
+          Game.Message.send("Sven can't do jack-diddly with a "+ this.getName());
+          Game.Message.send("Sven does need a pet though...")
+      },
+
+
+    },
+    stateNamespace: '_Useless_attr',
+    stateModel: {
+    },
+    init: function (template) {
+    }
+  }
+};

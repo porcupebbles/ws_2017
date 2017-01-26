@@ -4,15 +4,20 @@ Game.keyBinding = {
   attr: {
     _curKeys: [
       {label: 'up', keyUsed: 'w'},
-      {label: 'down', keyUsed: 's'},
+      {label: 'down', keyUsed: 'x'},
       {label: 'left', keyUsed: 'a'},
       {label: 'right', keyUsed: 'd'},
-      {label: 'scroll_up', keyUsed: 'i'},
-      {label: 'scroll_down', keyUsed: 'k'},
+      {label: 'up_right', keyUsed: 'e'},
+      {label: 'down_right', keyUsed: 'c'},
+      {label: 'up_left', keyUsed: 'q'},
+      {label: 'down_left', keyUsed: 'z'},
+      {label: 'wait', keyUsed: 's'},
+      // {label: 'scroll_up', keyUsed: 'i'},
+      // {label: 'scroll_down', keyUsed: 'k'},
       {label: 'save_screen', keyUsed: 't'},
-      {label: 'options', keyUsed: 'q'},
+      {label: 'help/options', keyUsed: 'o'},
       {label: 'swap_initiate', keyUsed: ' '},
-      {label: 'swap_confirm', keyUsed: 'v'},
+      {label: 'swap_confirm', keyUsed: 'Shift'},
       {label: 'item1', keyUsed: '1'},
       {label: 'item2', keyUsed: '2'},
       {label: 'item3', keyUsed: '3'},
@@ -87,7 +92,6 @@ Game.keyBinding = {
         console.log("you f'ed up, function not legit");
       }
     }else{
-      console.log("got here");
       Game.Message.send("key already used");
     }
   },

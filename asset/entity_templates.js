@@ -5,47 +5,52 @@ Game.EntityGenerator.learn({
   chr:'S',
   fg:'#dda',
   sightRadius: 100,//maybe issues here
-  maxHp: 10,
+  maxHp: 30,
   attackAvoid: 1,
-  attackDamage: 3,
+  attackDamage: 10,
   swappable: false, //not working
   mixins: ["PlayerActor", "PlayerMessager", "WalkerCorporeal", "Sight", "MapMemory", "HitPoints", "Chronicle", "MeleeAttacker", "MeleeDefender", "Inventory"]
 });
 
 Game.EntityGenerator.learn({
-  name: 'moss',
-  chr:'%',
-  fg:'#6b6',
-  maxHp: 1,
-  mixins: ["HitPoints"]
-});
-
-Game.EntityGenerator.learn({
-  name: 'newt',
-  chr:'~',
-  fg:'#f98',
-  maxHp: 2,
-  mixins: ["HitPoints", "WanderActor", "WalkerCorporeal"]
-});
-
-Game.EntityGenerator.learn({
-  name: 'angry squirrel',
-  chr:String.fromCharCode(163),
+  name: 'Weakened Cellar Troll',
+  chr:'T', //T
   fg:'#aaa',
-  maxHp: 2,
-  attackPower: 1,
-  attackAvoid: 2,
-  damageMitigation: 1,
-  mixins: ["HitPoints", "WanderActor", "WalkerCorporeal", "MeleeAttacker","MeleeDefender"]
+  maxHp: 4,
+  attackPower: 2,
+  sightRadius: 5,
+  mixins: ["HitPoints","Sight", "AlertableChaserActor", "WalkerCorporeal", "MeleeAttacker","MeleeDefender"]
+});
+
+Game.EntityGenerator.learn({
+  name: 'Cellar Troll',
+  chr:'T',
+  fg:'#cc0000', //red
+  maxHp: 8,
+  attackPower: 3,
+  sightRadius: 5,
+  mixins: ["HitPoints","Sight", "AlertableChaserActor", "WalkerCorporeal", "MeleeAttacker","MeleeDefender"]
 });
 
 Game.EntityGenerator.learn({
   name: 'cave wyrm',
   chr:'~',
-  fg:'#ff9',
+  fg:'#3385ff', //blue #0000e6
   maxHp: 4,
   sightRadius: 4,
-  attackPower: 1,
+  attackPower: 2,
+  wanderChaserActionDuration: 1200,
+  attackActionDuration: 3000,
+  mixins: ["HitPoints", "Sight", "WanderChaserActor", "WalkerCorporeal", "MeleeAttacker"]
+});
+
+Game.EntityGenerator.learn({
+  name: 'creepy wraith',
+  chr:'W',
+  fg:'#8a00e6', //purple
+  maxHp: 4,
+  sightRadius: 4,
+  attackPower: 2,
   wanderChaserActionDuration: 1200,
   attackActionDuration: 3000,
   mixins: ["HitPoints", "Sight", "WanderChaserActor", "WalkerCorporeal", "MeleeAttacker"]

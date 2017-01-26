@@ -76,6 +76,9 @@ Game.EntityMixin.PlayerActor = {
       'killed': function(evtData) {
         //Game.TimeEngine.lock();
         Game.switchUIMode(Game.UIMode.gameLose);
+      },
+      'won': function(evtData){
+        Game.switchUIMode(Game.UIMode.gameWin);
       }
     }
   },
@@ -125,6 +128,10 @@ Game.EntityMixin.WalkerCorporeal = {
           // var targetY = Math.min(Math.max(0,this.getY() + dy),map.getHeight()-1);
           var targetX = this.getX() + dx;
           var targetY = this.getY() + dy;
+          if(map.getTile(targetX, targetY).getWinning()){
+            this.raiseSymbolActiveEvent('won');
+          }
+
           if ((targetX < 0) || (targetX >= map.getWidth()) || (targetY < 0) || (targetY >= map.getHeight())) {
             this.raiseSymbolActiveEvent('walkForbidden',{target:Game.Tile.nullTile});
             return {madeAdjacentMove:false};
@@ -253,6 +260,10 @@ Game.EntityMixin.HitPoints = {
       'killed': function(evtData) {
         // console.log('HitPoints killed');
         this.destroy();
+      },
+      'hp_restored': function(evtData){
+        console.dir(evtData);
+        this.recoverHits( evtData.healing[0]);
       }
     }
   },
@@ -753,7 +764,6 @@ Game.EntityMixin.Inventory = {
   },
   useItem: function(idx){
     if(this.getItems()[idx]){
-      console.dir(this.getItems()[idx]);
       //bad practive should clean up at some point
       if(this.getItems()[idx].hasMixin('MeleeAttack')){
         var oldWeapon = this.equipWeapon(this.getItems()[idx]);
@@ -764,7 +774,12 @@ Game.EntityMixin.Inventory = {
           this.getItems().splice(idx, 1);
         }
       }
-      //this.getItems()[idx].raiseSymbolActiveEvent('used');//gotta flesh this out
+      if(this.getItems()[idx]){
+        var effects = this.getItems()[idx].raiseSymbolActiveEvent('used');//gotta flesh this out
+        if(effects.hasOwnProperty('healing')){
+          this.raiseSymbolActiveEvent('hp_restored', {healing: effects.healing});
+        }
+      }
     }else{
       Game.Message.send("Sven thinks that slot is empty");
     }

@@ -9,8 +9,13 @@ Game.Tile = function (properties) {
   this.attr._transparent = properties.transparent || false;
   this.attr._opaque = (properties.opaque !== undefined) ? properties.opaque : (! this.attr._transparent);
   this.attr._transparent = ! this.attr._opaque;
+  this.attr._winning = properties.winning || false;
 };
 Game.Tile.extend(Game.Symbol);
+
+Game.Tile.prototype.getWinning = function(){
+  return this.attr._winning;
+};
 
 Game.Tile.prototype.getSymbol = function () {
   return this.attr._sym;
@@ -37,10 +42,14 @@ Game.Tile.prototype.isTransparant = function() {
 
 Game.Tile.nullTile = new Game.Tile({name:'nullTile'});
 Game.Tile.floorTile = new Game.Tile({name:'floor', chr:'.', walkable:true, transparent: true});
-Game.Tile.wallTile = new Game.Tile({name:'wall',chr:'#', transparent: true});
+Game.Tile.wallTile = new Game.Tile({name:'wall',chr:'#', bg: '#333333', fg: '#262626', transparent: true});
 Game.Tile.hallTile = new Game.Tile({name: 'hall', chr: ' ', hall: true , walkable: true, transparent: true});
 
 Game.Tile.roomFloor = new Game.Tile({name: 'roomFloor', chr: '.', room: true, walkable: true, fg: '#605db1', transparent: true});
 Game.Tile.roomWall = new Game.Tile({name: 'roomWall', chr:'#', room: true, fg: '#605db1', transparent: true});
 
 Game.Tile.testTile = new Game.Tile({name:'test',chr:'M', walkable:true, transparent: true});
+
+Game.Tile.stairTile = new Game.Tile({name: 'stairTile', chr: '=', walkable:true, transparant: true, winning: true});
+
+Game.Tile.DEFAULT_COLOR_RoomWall = '#9a3232';//'#605db1';

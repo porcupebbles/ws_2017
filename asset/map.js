@@ -21,14 +21,19 @@ Game.Map = function (mapTileSetName, presetId) {
     var creatures = this.attr._rooms[i].getEnemies();
     var room_pos = this.attr._rooms[i].getPos();
     for(var j = 0; j < creatures.length; j++){
-      if(!creatures[i].pos){
+      //console.dir(creatures[j]);
+      var creature = Game.EntityGenerator.create(creatures[j].name);
+      if(creature.getName() == "creepy wraith"){
+        creature.setSwappable(false);
+      }
+      if(!creatures[j].pos){
         var rand_pos_room = this.attr._rooms[i].getRandomWalkableLocation();
-        this.addEntity(Game.EntityGenerator.create(creatures[i].name), {x: room_pos.x+rand_pos_room.x, y: room_pos.y+rand_pos_room.y});
+        this.addEntity(creature, {x: room_pos.x+rand_pos_room.x, y: room_pos.y+rand_pos_room.y});
       }else{
-        this.addEntity(Game.EntityGenerator.create(creatures[i].name), {x:creatures[i].pos.x+room_pos.x, y: creatures[i].pos.y+room_pos.y});
+        this.addEntity(creature, {x:creatures[j].pos.x+room_pos.x, y: creatures[j].pos.y+room_pos.y});
       }
     }
-
+//console.log("got through creature loop " + j);
     var items = this.attr._rooms[i].getItems();
     for(var j = 0; j < items.length; j++){
       if(!items[j].pos){
@@ -38,6 +43,7 @@ Game.Map = function (mapTileSetName, presetId) {
         this.addItem(Game.ItemGenerator.create(items[j].name), {x:items[j].pos.x+room_pos.x, y: items[j].pos.y+room_pos.y});
       }
     }
+    console.log("made room "+i);
   }
 
   this._fov = null;

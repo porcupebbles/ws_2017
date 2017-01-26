@@ -16,11 +16,11 @@ Game.Message = {
     var staleMsgIdx = 0;
     // fresh messages in white
     for (freshMsgIdx = 0; freshMsgIdx < this.attr.freshMessagesReverseQueue.length && dispRow < dispRowMax; freshMsgIdx++) {
-      dispRow += display.drawText(1,dispRow,'%c{#fff}%b{#000}'+this.attr.freshMessagesReverseQueue[freshMsgIdx]+'%c{}%b{}',79);
+      dispRow += display.drawText(1,dispRow,'%c{#fff}%b{#000}'+this.attr.freshMessagesReverseQueue[freshMsgIdx]+'%c{}%b{}',38);
     }
     // stale messages in grey
     for (staleMsgIdx = 0; staleMsgIdx < this.attr.staleMessagesQueue.length && dispRow < dispRowMax; staleMsgIdx++) {
-      dispRow += display.drawText(1,dispRow,'%c{#aaa}%b{#000}'+this.attr.staleMessagesQueue[staleMsgIdx]+'%c{}%b{}',79);
+      dispRow += display.drawText(1,dispRow,'%c{#aaa}%b{#000}'+this.attr.staleMessagesQueue[staleMsgIdx]+'%c{}%b{}',38);
     }
   },
   ageMessages:function (lastStaleMessageIdx) {

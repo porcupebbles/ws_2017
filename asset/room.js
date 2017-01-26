@@ -11,11 +11,19 @@ Game.Room = function(roomTileSetName, pos, map){
     _first_selected: null,
     _second_selected: null,
     _enemies: info.enemies || [],
-    _items: info.items || []
+    _items: info.items || [],
+    _visited: false
   }
   this.attr._block_x = this.attr._width/this.attr._block_dim.width;
   this.attr._block_y = this.attr._height/this.attr._block_dim.height;
 
+};
+
+Game.Room.prototype.isVisited = function(){
+  return this.attr._visited;
+};
+Game.Room.prototype.setVisited = function(state){
+  this.attr._visited = state;
 };
 
 Game.Room.prototype.getEnemies = function(){
@@ -42,7 +50,7 @@ Game.Room.prototype.setFirstSelected = function(px, py){
     var info = this.getBlock(px, py);
     for(var i = 0; i<this.attr._block_dim.width; i++){
       for(var j = 0; j<this.attr._block_dim.height; j++){
-        this.setTileBg(i+info.pos.x, j+info.pos.y, '#9966ff');
+        this.setTileBg(i+info.pos.x, j+info.pos.y, '#ffff00');
       }
     }
     this.attr._first_selected = {x: px, y:py};
@@ -68,7 +76,7 @@ Game.Room.prototype.setSecondSelected = function(px, py){
     var info = this.getBlock(px, py);
     for(var i = 0; i<this.attr._block_dim.width; i++){
       for(var j = 0; j<this.attr._block_dim.height; j++){
-        this.setTileBg(i+info.pos.x, j+info.pos.y, '#ff66cc');
+        this.setTileBg(i+info.pos.x, j+info.pos.y, '#c299ff');
       }
     }
     this.attr._second_selected = {x: px, y:py};
@@ -148,6 +156,7 @@ Game.Room.prototype.containsSwappable = function(x, y){
     for(var j = 0; j < this.attr._block_dim.height; j++){
       var ent = map.getEntity(info.pos.x+i+this.getPos().x, info.pos.y+j+this.getPos().y);
       if( ent && !ent.isSwappable()){
+        Game.Message.send("Some mystical forces are blocking Sven's magic there");
         return true;
 
       }

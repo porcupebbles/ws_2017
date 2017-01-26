@@ -125,7 +125,7 @@ Game.util = {
     var the = Game.util.init2DArray(x, y, Game.Tile.nullTile);
     for(var i = 0; i < the.length; i++){
       for(var j = 0; j < the[0].length; j++){
-        the[i][j] = new Game.Tile({name: 'roomWall', chr:'#', room: true, fg: '#5c8a8a', transparent: true});
+        the[i][j] = new Game.Tile({name: 'roomWall', chr:'#', room: true, fg: Game.Tile.DEFAULT_COLOR_RoomWall, transparent: true});
       }
     }
     return the;
@@ -134,7 +134,7 @@ Game.util = {
     var the = Game.util.init2DArray(x, y, Game.Tile.nullTile);
     for(var i = 0; i < the.length; i++){
       for(var j = 0; j < the[0].length; j++){
-        the[i][j] = new Game.Tile({name:'floor', chr:'.', walkable:true, transparent: true});
+        the[i][j] = new Game.Tile({name:'floor', chr:' ', walkable:true, transparent: true});
       }
     }
     return the;
