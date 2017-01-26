@@ -33,7 +33,6 @@ Game.Map = function (mapTileSetName, presetId) {
         this.addEntity(creature, {x:creatures[j].pos.x+room_pos.x, y: creatures[j].pos.y+room_pos.y});
       }
     }
-//console.log("got through creature loop " + j);
     var items = this.attr._rooms[i].getItems();
     for(var j = 0; j < items.length; j++){
       if(!items[j].pos){
@@ -43,7 +42,6 @@ Game.Map = function (mapTileSetName, presetId) {
         this.addItem(Game.ItemGenerator.create(items[j].name), {x:items[j].pos.x+room_pos.x, y: items[j].pos.y+room_pos.y});
       }
     }
-    console.log("made room "+i);
   }
 
   this._fov = null;

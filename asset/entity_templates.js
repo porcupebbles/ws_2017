@@ -5,9 +5,9 @@ Game.EntityGenerator.learn({
   chr:'S',
   fg:'#dda',
   sightRadius: 100,//maybe issues here
-  maxHp: 30,
+  maxHp: 15,
   attackAvoid: 1,
-  attackDamage: 10,
+  attackDamage: 2,
   swappable: false, //not working
   mixins: ["PlayerActor", "PlayerMessager", "WalkerCorporeal", "Sight", "MapMemory", "HitPoints", "Chronicle", "MeleeAttacker", "MeleeDefender", "Inventory"]
 });
@@ -17,7 +17,7 @@ Game.EntityGenerator.learn({
   chr:'T', //T
   fg:'#aaa',
   maxHp: 4,
-  attackPower: 2,
+  attackPower: 3,
   sightRadius: 5,
   mixins: ["HitPoints","Sight", "AlertableChaserActor", "WalkerCorporeal", "MeleeAttacker","MeleeDefender"]
 });
@@ -36,7 +36,7 @@ Game.EntityGenerator.learn({
   name: 'cave wyrm',
   chr:'~',
   fg:'#3385ff', //blue #0000e6
-  maxHp: 4,
+  maxHp: 5,
   sightRadius: 4,
   attackPower: 2,
   wanderChaserActionDuration: 1200,
@@ -48,9 +48,9 @@ Game.EntityGenerator.learn({
   name: 'creepy wraith',
   chr:'W',
   fg:'#8a00e6', //purple
-  maxHp: 4,
+  maxHp: 8,
   sightRadius: 4,
-  attackPower: 2,
+  attackPower: 4,
   wanderChaserActionDuration: 1200,
   attackActionDuration: 3000,
   mixins: ["HitPoints", "Sight", "WanderChaserActor", "WalkerCorporeal", "MeleeAttacker"]

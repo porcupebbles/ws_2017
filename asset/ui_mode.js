@@ -68,7 +68,12 @@ Game.UIMode.gamePlay = {
     if (this.attr._avatarId) {
       this.setCameraToAvatar();
     }
-
+    var curRoom = this.getCurrentRoom();
+    if(curRoom && !curRoom.isVisited()){
+      curRoom.setVisited(true);
+      Game.Message.send(Game.Room_Messages[0]);
+      Game.Room_Messages.splice(0, 1);
+    }
     Game.TimeEngine.unlock();
     Game.refresh();
   },
@@ -331,7 +336,6 @@ Game.UIMode.gamePlay = {
     this.setAvatar(Game.EntityGenerator.create('avatar'));
 
     this.getMap().addEntity(this.getAvatar(),{x: 4, y: 4});
-    this.getMap().addEntity(Game.EntityGenerator.create('Cellar Troll'), {x:8, y:8});
     this.setCameraToAvatar();
   },
 
@@ -350,13 +354,13 @@ Game.UIMode.gameWin = {
     exit: function(){
     },
     render: function(display){
-      display.drawText(10,7,"%c{#000}.%c{} __ __  ___  __ __      __    __ ____ ____  ");
-      display.drawText(10,8,"%c{#000}.%c{}|  |  |/   \\|  |  |    |  |__|  |    |    \\ ");
+      display.drawText(10,8,"%c{#000}.%c{} __ __  ___  __ __      __    __ ____ ____  ");
+      display.drawText(10,9,"%c{#000}.%c{}|  |  |/   \\|  |  |    |  |__|  |    |    \\ ");
       display.drawText(10,10,"%c{#000}.%c{}|  |  |     |  |  |    |  |  |  ||  ||  _  |");
       display.drawText(10,11,"%c{#000}.%c{}|  ~  |  O  |  |  |    |  |  |  ||  ||  |  |");
       display.drawText(10,12,"%c{#000}.%c{}|___, |     |  :  |    |  `  '  ||  ||  |  |");
       display.drawText(10,13,"%c{#000}.%c{}|     |     |     |     \\      / |  ||  |  |");
-      display.drawText(10,14,"%c{#000}.%c{}|____/ \\___/ \\__,_|      \\_/\\_/ |____|__|__|");
+      display.drawText(10,14,"%c{#000}.%c{}|____/ \\___/ \\__,_|      \\_/\\_/ |____|__|__|  at least this level...");
       display.drawText(10, 20, "press 'n' for a new game and 'l' to load an existing game");
     },
     handleInput: function(inputType, inputData){

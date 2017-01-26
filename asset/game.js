@@ -174,7 +174,8 @@ var Game = {
     this.renderAll();
   },
 
-  Room_Messages: ["Sven should have never should have gone exploring his basement...\nIf you help Sven escape, Sven would be most greatfull.\nSven can move horizontally and diagonally using your directional keys",
+  //this is a gross way of handling this
+  Room_Messages: ["Sven should have never should have gone exploring his basement...\nIf you help Sven escape, Sven would be most greatfull.\nSven can move horizontally and diagonally using your directional keys (q, w, e, r, a, s, d, z, x and c)",
 
   "Sven, using the space key, can swap groups of tiles in a room and a swap can be cancelled the same way. Pressing shift will confirm the swap",
 

@@ -165,7 +165,7 @@ Game.MapTileSets = {
 
       var all_rooms = [];
 
-      var room_name = ['TutorialRoom1', 'TutorialRoom2', 'TutorialRoom3','TutorialRoom4', 'mazeRoom', 'mazeRoom', 'mazeRoom'];
+      var room_name = ['TutorialRoom1', 'TutorialRoom2', 'TutorialRoom3','TutorialRoom4', 'TutorialRoom5', 'TutorialRoom6', 'mazeRoom'];
       var x_pos = 0;
       for(var i = 0; i < 7; i++){
         //console.log(i, ".", 1)
@@ -178,7 +178,18 @@ Game.MapTileSets = {
         mapTiles = Game.MapTileSets.setFeature(mapTiles, room.getTiles(), room.getPos());
         //console.log(i, ".", 3)
         //if(i !== 7){
-          mapTiles = Game.MapTileSets.setFeature(mapTiles, Game.util.init2DArray(10, 1, Game.Tile.hallTile), {x:x_pos+room.getWidth(), y: 5});
+        var h = 0;
+        switch(i){
+          case 0: h = 4; break;
+          case 1: h = 5; break;
+          case 2: h = 5; break;
+          case 3: h = 5; break;
+          case 4: h = 20; break;
+          case 5: h = 2; break;
+          case 6: h = 5; break;
+          default: h = 5; break;
+        }
+        mapTiles = Game.MapTileSets.setFeature(mapTiles, Game.util.init2DArray(10, 1, Game.Tile.hallTile), {x:x_pos+room.getWidth(), y: h});
         //}
         //console.log(i, ".", 4)
         x_pos = x_pos + room.getWidth() + 10;

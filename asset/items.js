@@ -14,6 +14,20 @@ Game.ItemGenerator.learn({
   healingAmount: 10,
   mixins: ["Healing"]
 });
+Game.ItemGenerator.learn({
+  name: 'swedish meatballs',
+  chr:'f',//String.fromCharCode(174),
+  fg:Game.Item.DEFAULT_COLOR_Misc,
+  healingAmount: 5,
+  mixins: ["Healing"]
+});
+Game.ItemGenerator.learn({
+  name: 'mystery potion',
+  chr:'p',//String.fromCharCode(174),
+  fg:Game.Item.DEFAULT_COLOR_Misc,
+  healingAmount: 7,
+  mixins: ["Healing"]
+});
 
 Game.ItemGenerator.learn({
   name: 'rusty dagger',
