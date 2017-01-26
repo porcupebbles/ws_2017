@@ -17,7 +17,7 @@ Game.EntityGenerator.learn({
   chr:'T', //T
   fg:'#aaa',
   maxHp: 4,
-  attackPower: 3,
+  attackDamage: 3,
   sightRadius: 5,
   mixins: ["HitPoints","Sight", "AlertableChaserActor", "WalkerCorporeal", "MeleeAttacker","MeleeDefender"]
 });
@@ -27,7 +27,7 @@ Game.EntityGenerator.learn({
   chr:'T',
   fg:'#cc0000', //red
   maxHp: 8,
-  attackPower: 3,
+  attackDamage: 3,
   sightRadius: 5,
   mixins: ["HitPoints","Sight", "AlertableChaserActor", "WalkerCorporeal", "MeleeAttacker","MeleeDefender"]
 });
@@ -38,7 +38,7 @@ Game.EntityGenerator.learn({
   fg:'#3385ff', //blue #0000e6
   maxHp: 5,
   sightRadius: 4,
-  attackPower: 2,
+  attackDamage: 2,
   wanderChaserActionDuration: 1200,
   attackActionDuration: 3000,
   mixins: ["HitPoints", "Sight", "WanderChaserActor", "WalkerCorporeal", "MeleeAttacker"]
@@ -50,7 +50,7 @@ Game.EntityGenerator.learn({
   fg:'#8a00e6', //purple
   maxHp: 8,
   sightRadius: 4,
-  attackPower: 4,
+  attackDamage: 4,
   wanderChaserActionDuration: 1200,
   attackActionDuration: 3000,
   mixins: ["HitPoints", "Sight", "WanderChaserActor", "WalkerCorporeal", "MeleeAttacker"]
